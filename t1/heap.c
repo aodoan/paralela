@@ -8,7 +8,7 @@ float *Input;
 
 #define OK 2012
 #define NOK 2000 
-
+/*
 int cmpfunc (const void * a, const void * b)
 {
   float fa = *(const float*) a;
@@ -16,17 +16,18 @@ int cmpfunc (const void * a, const void * b)
   return (fa > fb) - (fa < fb);
 }
 
-int verifyOutput( Input, Output, nTotalElements, k ){ 
+int verifyOutput(float* Input, float* Output,int nTotalElements, int k ){ 
     qsort(Input, n, sizeof(float), cmpfunc);
 
     for(int i = 0; i < nTotalElements; i++){
-        if(Input != Output) return NOK;
+        if(Input[i] != Output[i/2 - 1])
     }
+
 
     return OK;
 
 }
-
+*/
 
 int main(int argc, char **argv){
     //get parameters from command line
@@ -39,8 +40,10 @@ int main(int argc, char **argv){
     nThreads = atoi(argv[3]);
     int a, b;
     float v;
-    Input = malloc(sizeof(float) * n);
-    for(int i = 0; i < n; i++){
+    Input = malloc(sizeof(float) * nTotalElements);
+    
+    srand(2023);
+    for(int i = 0; i < nTotalElements; i++){
         a = rand();
         b = rand();
         v = a * 1.0 + b;
