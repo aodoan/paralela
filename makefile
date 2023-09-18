@@ -1,9 +1,9 @@
 # Makefile
 
-TARGET = sequencial.out
+TARGET = acharKMenores.out
 CFLAGS = -Wall -g -O3 -lm
 VPATH = src
-objs = sequencial.o
+objs = acharKMenores.o utils.o
 PROGRAMS = $(patsubst src/%.c, %, $(wildcard src/*.c))
 
 .PHONY: all clean purge debug
