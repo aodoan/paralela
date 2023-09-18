@@ -18,17 +18,16 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
     pair_t *sorted = malloc(sizeof(Input));
     memcpy(sorted, Input, sizeof(Input));
 
-    
     // inserir aqui o codigo da verificacao
     // uma implementação possível para o verificador seria
     // (nao precisa seguir essa descrição, voce pode fazer outro método
     //  de verificação)
     //
-    // 1) Criar um vetor I de pares (chave, valor) 
+    // 1) Criar um vetor I de pares (chave, valor)
     //    os os elementos de I devem ser copias
     //    de cada valor (e,p) do vetor de entrada Input
     //    (ou seja, cada valor e que veio da posição p da entrada)
-    // 2) Ordenar o vetor I em ordem crescente, 
+    // 2) Ordenar o vetor I em ordem crescente,
     //    obtendo-se um outro vetor Is (ordenado em ordem crescente de chaves)
     //    usando um algoritmo de ordenação do tipo (chave, valor)
     //    (por exemplo ordenação da stdlib, caso exista)
@@ -83,7 +82,7 @@ inline void swap(int *a, int *b)  //__attribute__((always_inline));
     *b = temp;
 }
 
-void maxHeapify(pair_t* heap, int size, int i){
+void maxHeapify(pair_t *heap, int size, int i) {
     pair_t temp;
     float *Input;
     while (1) {
@@ -93,15 +92,16 @@ void maxHeapify(pair_t* heap, int size, int i){
 
         if (left < size && heap[left].key > heap[largest].key) largest = left;
 
-        if (right < size && heap[right].key > heap[largest].key) largest = right;
+        if (right < size && heap[right].key > heap[largest].key)
+            largest = right;
 
         if (largest != i) {
             temp.key = heap[i].key;
-            temp.val = heap[i].val; 
+            temp.val = heap[i].val;
             heap[i].key = heap[largest].key;
-            heap[i].val = heap[largest].val; 
+            heap[i].val = heap[largest].val;
             heap[largest].key = temp.key;
-            heap[largest].val = temp.val; 
+            heap[largest].val = temp.val;
             i = largest;
 
         } else {
@@ -140,7 +140,8 @@ int isMaxHeap(int heap[], int size) {
         }
     return 1;
 }
-void decreaseMax(pair_t* heap, int size, float new_value, int val) {
+
+void decreaseMax(pair_t *heap, int size, float new_value, int val) {
     if (size == 0)  // Heap is empty
         return;
 
@@ -151,10 +152,8 @@ void decreaseMax(pair_t* heap, int size, float new_value, int val) {
     }
 }
 
-
-int cmpfunc (const void * a, const void * b)
-{
-  float fa = *(const float*) a;
-  float fb = *(const float*) b;
-  return (fa > fb) - (fa < fb);
+int cmpfunc(const void *a, const void *b) {
+    float fa = *(const float *)a;
+    float fb = *(const float *)b;
+    return (fa > fb) - (fa < fb);
 }
