@@ -3,17 +3,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct {
-    float key;   // inserir um valor v float na chave 
-                 //  (obtido do vetor de entrada Input)
-    int val;     // inserir a posiçao p como valor val
-} pair_t;
+struct {
+    float key;
+    int val;
+} typedef pair_t;
 
+extern float *Input;
 
-void maxHeapify(pair_t* heap, int size, int i);
-void heapifyUp(int heap[], int *size, int pos) ;
+void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
+                  int k);
+void drawHeapTree(int heap[], int size, int nLevels);
+void maxHeapify(int heap[], int size, int i);
+void heapifyUp(int heap[], int *size, int pos);
 void insert(int heap[], int *size, int element);
 int isMaxHeap(int heap[], int size);
-void decreaseMax(pair_t* heap, int size, float new_value, int val);
-int cmpfunc (const void * a, const void * b);
-#endif 
+void decreaseMax(int heap[], int size, int new_value);
+
+#endif
