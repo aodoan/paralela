@@ -8,16 +8,23 @@
 #define SHOW_DECREASE_MAX_STEPS 1
 #define MAX_HEAP_SIZE (1024 * 1024)
 
-float *Input;
 
 void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
                   int k) {
     int ok = 1;
     printf("%i", sizeof(Input));
 
-    pair_t *sorted = malloc(sizeof(Input));
-    memcpy(sorted, Input, sizeof(Input));
-
+    pair_t *sorted = malloc(sizeof(pair_t) * nTotalElmts);
+    for(int i = 0; i < nTotalElmts; i++){
+        sorted[i].key = Input[i];
+        sorted[i].val = i;
+    }
+    qsort(sorted, nTotalElmts, sizeof(pair_t), cmpfuncK);
+    printf("\n");
+    for(int i = 0; i < n; i++) printf("[%i %f] ", sorted[i].val, sorted[i].key);
+    printf("\n");
+    qsort(Output, k, sizeof(pair_t), cmpfuncK);
+    for(int i = 0; i < k; i++) printf("[%i %f] ", Output[i].val, Output[i].key);
     // inserir aqui o codigo da verificacao
     // uma implementação possível para o verificador seria
     // (nao precisa seguir essa descrição, voce pode fazer outro método
@@ -155,5 +162,13 @@ void decreaseMax(pair_t *heap, int size, float new_value, int val) {
 int cmpfunc(const void *a, const void *b) {
     float fa = *(const float *)a;
     float fb = *(const float *)b;
+    return (fa > fb) - (fa < fb);
+}
+
+int cmpfuncK(const void *A, const void *B) {
+    pair_t *a = &A;
+    pair_t *b = B;
+    float fa = a->key;
+    float fb = b->key;
     return (fa > fb) - (fa < fb);
 }

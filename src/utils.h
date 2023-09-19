@@ -2,6 +2,7 @@
 #define UTILS_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 struct {
     float key;
@@ -18,5 +19,6 @@ void heapifyUp(int heap[], int *size, int pos);
 void insert(int heap[], int *size, int element);
 int isMaxHeap(int heap[], int size);
 void decreaseMax(pair_t *heap, int size, float new_value, int val);
-
+int cmpfunc(const void *a, const void *b);
+int cmpfuncK(const void *A, const void *B);
 #endif
