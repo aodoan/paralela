@@ -18,32 +18,23 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
         sorted[i].key = Input[i];
         sorted[i].val = i;
     }
+
+    
     qsort(sorted, nTotalElmts, sizeof(pair_t), cmpfuncK);
     qsort(Output, k, sizeof(pair_t), cmpfuncK);
 
+    /* 
+    for(int i = 0; i < nTotalElmts; i++) printf("[%f %i] ", sorted[i].key, sorted[i].val);
+    printf("\n");
+    for(int i = 0; i < k; i++)  printf("[%f %i] ", Output[i].key, Output[i].val);
+    printf("\n");
+    */
+
+    //verify if the heap is correct
     for(int i = 0; i < k; i++){
         if(sorted[i].key != Output[i].key)
             ok = 0;
     }
-
-    // inserir aqui o codigo da verificacao
-    // uma implementação possível para o verificador seria
-    // (nao precisa seguir essa descrição, voce pode fazer outro método
-    //  de verificação)
-    //
-    // 1) Criar um vetor I de pares (chave, valor)
-    //    os os elementos de I devem ser copias
-    //    de cada valor (e,p) do vetor de entrada Input
-    //    (ou seja, cada valor e que veio da posição p da entrada)
-    // 2) Ordenar o vetor I em ordem crescente,
-    //    obtendo-se um outro vetor Is (ordenado em ordem crescente de chaves)
-    //    usando um algoritmo de ordenação do tipo (chave, valor)
-    //    (por exemplo ordenação da stdlib, caso exista)
-    // 3) Para cada par (ki,vi) pertencente ao vetor Output
-    //      procurar a chave ki dentre K primeiros elementos
-    //      de Is.
-    //      Se a chave Ki estiver em Is com valor val==vi continue
-    //      senão faça ok = 0 e reporte o erro abaixo
 
     if (ok)
         printf("\nOutput set verifyed correctly.\n");
@@ -122,7 +113,7 @@ void maxHeapify(pair_t *heap, int size, int i) {
 inline int parent(int pos) { return ((pos - 1) / 2); }
 
 void heapifyUp(pair_t* heap, int *size, int pos) {
-    int val = heap[pos].key;
+    float val = heap[pos].key;
     while (pos > 0 && val > heap[parent(pos)].key) {
         heap[pos].key = heap[parent(pos)].key;
         heap[pos].val = heap[parent(pos)].val;
@@ -134,7 +125,6 @@ void heapifyUp(pair_t* heap, int *size, int pos) {
 void insert(pair_t* heap, int size, float element) {
     size += 1;
     int last = size - 1;
-    printf("alo\n");
     heap[last].key = element;
     heap[last].val = size-1;
     heapifyUp(heap, size, last);
