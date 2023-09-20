@@ -197,12 +197,12 @@ void *threadedMaxHeap(void *args) {
 
     this->heap = malloc(sizeof(pair_t) * this->sizeHeap);
 
-    for (int i = 0; i < this->sizeHeap; ++i, ++inputPointer)
-        insert(this->heap, this->sizeHeap, *inputPointer);
+    for (int i = 0; i < this->sizeHeap; ++i, ++inputPointer, ++inputIndex)
+        insert(this->heap, this->sizeHeap, *inputPointer, inputIndex);
 
     this->sizeSearch -= this->sizeHeap;
     this->startPoint += sizeof(float) * this->sizeHeap;
 
-    for (; inputPointer != this->endPoint; ++inputPointer, inputIndex++)
+    for (; inputPointer != this->endPoint; ++inputPointer, ++inputIndex)
         decreaseMax(this->heap, this->sizeHeap, *inputPointer, inputIndex);
 }
