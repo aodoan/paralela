@@ -13,15 +13,18 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
                   int k) {
     int ok = 1;
 
-    pair_t *sorted = malloc(sizeof(pair_t) * nTotalElmts);
-    for(int i = 0; i < nTotalElmts; i++){
-        sorted[i].key = Input[i];
-        sorted[i].val = i;
+    pair_t *sortedInput = malloc(sizeof(pair_t) * nTotalElmts);
+
+    for(int i = 0; i < nTotalElmts; ++i){
+        sortedInput[i].key = Input[i];
+        sortedInput[i].val = i;
     }
 
-    
-    qsort(sorted, nTotalElmts, sizeof(pair_t), cmpfuncK);
-    qsort(Output, k, sizeof(pair_t), cmpfuncK);
+    pair_t *sortedOutput = malloc(sizeof(pair_t) * k);
+    memcpy(sortedOutput, Output, sizeof(pair_t) * k);
+
+    qsort(sortedInput, nTotalElmts, sizeof(pair_t), cmpfuncK);
+    qsort(sortedOutput, k, sizeof(pair_t), cmpfuncK);
 
     /* 
     for(int i = 0; i < nTotalElmts; i++) printf("[%f %i] ", sorted[i].key, sorted[i].val);
@@ -32,7 +35,7 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
 
     //verify if the heap is correct
     for(int i = 0; i < k; i++){
-        if(sorted[i].key != Output[i].key)
+        if(sortedInput[i].key != sortedOutput[i].key)
             ok = 0;
     }
 
@@ -127,7 +130,7 @@ void insert(pair_t* heap, int size, float element) {
     int last = size - 1;
     heap[last].key = element;
     heap[last].val = size-1;
-    heapifyUp(heap, size, last);
+    heapifyUp(heap, &size, last);
 }
 
 int isMaxHeap(pair_t* heap, int size) {
@@ -160,9 +163,7 @@ int cmpfunc(const void *a, const void *b) {
 }
 
 int cmpfuncK(const void *A, const void *B) {
-    pair_t *a = A;
-    pair_t *b = B;
-    float fa = a->key;
-    float fb = b->key;
+    float fa = ((pair_t*) A)->key;
+    float fb = ((pair_t*) B)->key;
     return (fa > fb) - (fa < fb);
 }
