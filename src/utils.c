@@ -40,7 +40,7 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
     }
 
     if (ok)
-        printf("\nOutput set verifyed correctly.\n");
+        printf("\nOutput set verified correctly.\n");
     else
         printf("\nOutput set DID NOT compute correctly!!!\n");
 }
@@ -138,8 +138,8 @@ int isMaxHeap(pair_t* heap, int size) {
         if (heap[i].key <= heap[parent(i)].key)
             continue;
         else {
-            printf("\nbroke at [%d]=%d\n", i, heap[i].key);
-            printf("father at [%d]=%d\n", parent(i), heap[parent(i)].key);
+            printf("\nbroke at [%d]=%f\n", i, heap[i].key);
+            printf("father at [%d]=%f\n", parent(i), heap[parent(i)].key);
             return 0;
         }
     return 1;
