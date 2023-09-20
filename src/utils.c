@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #define SHOW_DECREASE_MAX_STEPS 1
 #define MAX_HEAP_SIZE (1024 * 1024)
@@ -86,7 +87,6 @@ inline void swap(int *a, int *b)  //__attribute__((always_inline));
 
 void maxHeapify(pair_t *heap, int size, int i) {
     pair_t temp;
-    float *Input;
     while (1) {
         int largest = i;
         int left = 2 * i + 1;
@@ -125,11 +125,11 @@ void heapifyUp(pair_t* heap, int *size, int pos) {
     heap[pos].key = val;
 }
 
-void insert(pair_t* heap, int size, float element) {
+void insert(pair_t* heap, int size, float element, int val) {
     size += 1;
     int last = size - 1;
     heap[last].key = element;
-    heap[last].val = size-1;
+    heap[last].val = val;
     heapifyUp(heap, &size, last);
 }
 
@@ -167,3 +167,29 @@ int cmpfuncK(const void *A, const void *B) {
     float fb = ((pair_t*) B)->key;
     return (fa > fb) - (fa < fb);
 }
+
+//recebe nTotalThreads heaps e retorna uma max-heap com os k menores elementos
+pair_t *get_one_heap(pair_t **heap_set, int nTotalThreads, int k){
+    pair_t *heap = malloc(sizeof(heap) * k);
+    int counter[nTotalThreads];
+    for(int i = 0; i < nTotalThreads; i++) counter[i] = 0;
+
+    pair_t menor;
+    int index;
+    for(int i = 0; i < k; i++){
+        menor.key = INT_MAX;
+        index = 0;
+        for(int j = 0; j < nTotalThreads; j++){
+            if(heap_set[j][counter[j]].key < menor.key){
+                menor.key = heap_set[j][counter[j]].key;
+                menor.val = heap_set[j][counter[j]].val;
+                index = j;
+            }
+        }
+        counter[index]++;
+        insert(heap, i, menor.key, menor.val);
+    }
+
+    return heap;
+}
+

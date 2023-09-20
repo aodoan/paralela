@@ -31,21 +31,42 @@ int main(int argc, char **argv){
         v = a * 100.0 + b;
         Input[i] = v;
     } 
+    pair_t **heap = malloc(sizeof(pair_t*) * nThreads);
+    for(int i = 0; i < nThreads; i++)
+        heap[i] = malloc(sizeof(pair_t) * k);
     
-    heap = malloc(sizeof(pair_t) * k);
-
+    int sizeOfDistribution = floor(nTotalElements / nThreads);
     //cria uma max heap com os primeiros k elementos do vetor de entrada
-    for(int i = 0; i < k; i++){
-        insert(heap, i, Input[i]);
-    }
-
-    //itera sobre o restante do vetor
-    for(int i = k; i < nTotalElements; i++)
-        decreaseMax(heap, k, Input[i], i);
     
+    for(int j = 0, offset = 0; j < nThreads; j++){
+        for(int i = 0; i < k; i++){
+            insert(heap[j], i, Input[i+offset], i+offset);
+        }
+        offset += sizeOfDistribution;
+    }
+    
+
+    for(int i = 0; i < nThreads; i++){
+        printf("1 heap: ");
+        for(int j = 0; j < k && j < nTotalElements; j++)
+            printf("[%f %i] ", heap[i][j].key, heap[i][j].val);
+        printf("\n");
+    }
+    
+    //itera sobre o restante do vetor
+    /*
+    for(int i = k; i < nTotalElements; i++)
+        decreaseMax(heap[0], k, Input[i], i);
     
     //qsort(Input, nTotalElements, sizeof(float), cmpfunc);
     //colocar ifdef aqui
-    verifyOutput(Input, heap, nTotalElements, k);
+    verifyOutput(Input, heap[0], nTotalElements, k);
+    */
+    pair_t *Output = get_one_heap(heap, nTotalElements, k);
+    for(int i = 0; i < k; i++){
+        printf("[%f %i] ",Output[i].key, Output[i].val);
+
+    }
+    printf("\n");
     return 0;
 }
