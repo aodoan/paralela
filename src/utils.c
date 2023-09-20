@@ -12,7 +12,6 @@
 void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
                   int k) {
     int ok = 1;
-    printf("%i", sizeof(Input));
 
     pair_t *sorted = malloc(sizeof(pair_t) * nTotalElmts);
     for(int i = 0; i < nTotalElmts; i++){
@@ -20,11 +19,13 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
         sorted[i].val = i;
     }
     qsort(sorted, nTotalElmts, sizeof(pair_t), cmpfuncK);
-    printf("\n");
-    for(int i = 0; i < n; i++) printf("[%i %f] ", sorted[i].val, sorted[i].key);
-    printf("\n");
     qsort(Output, k, sizeof(pair_t), cmpfuncK);
-    for(int i = 0; i < k; i++) printf("[%i %f] ", Output[i].val, Output[i].key);
+
+    for(int i = 0; i < k; i++){
+        if(sorted[i].key != Output[i].key)
+            ok = 0;
+    }
+
     // inserir aqui o codigo da verificacao
     // uma implementação possível para o verificador seria
     // (nao precisa seguir essa descrição, voce pode fazer outro método
@@ -97,7 +98,8 @@ void maxHeapify(pair_t *heap, int size, int i) {
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
-        if (left < size && heap[left].key > heap[largest].key) largest = left;
+        if (left < size && heap[left].key > heap[largest].key) 
+            largest = left;
 
         if (right < size && heap[right].key > heap[largest].key)
             largest = right;
@@ -119,30 +121,32 @@ void maxHeapify(pair_t *heap, int size, int i) {
 
 inline int parent(int pos) { return ((pos - 1) / 2); }
 
-void heapifyUp(int heap[], int *size, int pos) {
-    int val = heap[pos];
-    while (pos > 0 && val > heap[parent(pos)]) {
-        heap[pos] = heap[parent(pos)];
+void heapifyUp(pair_t* heap, int *size, int pos) {
+    int val = heap[pos].key;
+    while (pos > 0 && val > heap[parent(pos)].key) {
+        heap[pos].key = heap[parent(pos)].key;
+        heap[pos].val = heap[parent(pos)].val;
         pos = parent(pos);
     }
-    heap[pos] = val;
+    heap[pos].key = val;
 }
 
-void insert(int heap[], int *size, int element) {
-    *size += 1;
-    int last = *size - 1;
-
-    heap[last] = element;
+void insert(pair_t* heap, int size, float element) {
+    size += 1;
+    int last = size - 1;
+    printf("alo\n");
+    heap[last].key = element;
+    heap[last].val = size-1;
     heapifyUp(heap, size, last);
 }
 
-int isMaxHeap(int heap[], int size) {
+int isMaxHeap(pair_t* heap, int size) {
     for (int i = 1; i < size; i++)
-        if (heap[i] <= heap[parent(i)])
+        if (heap[i].key <= heap[parent(i)].key)
             continue;
         else {
-            printf("\nbroke at [%d]=%d\n", i, heap[i]);
-            printf("father at [%d]=%d\n", parent(i), heap[parent(i)]);
+            printf("\nbroke at [%d]=%d\n", i, heap[i].key);
+            printf("father at [%d]=%d\n", parent(i), heap[parent(i)].key);
             return 0;
         }
     return 1;
@@ -166,7 +170,7 @@ int cmpfunc(const void *a, const void *b) {
 }
 
 int cmpfuncK(const void *A, const void *B) {
-    pair_t *a = &A;
+    pair_t *a = A;
     pair_t *b = B;
     float fa = a->key;
     float fb = b->key;

@@ -26,28 +26,36 @@ int main(int argc, char **argv){
     
     srand(time(NULL));
     for(int i = 0; i < nTotalElements; i++){
-        a = rand();
-        b = rand();
-        //v = a * 100.0 + b;
-        v = 100.0 - i;
+        a = rand() % 100;
+        b = rand() % 100;
+        v = a * 1.0 + b;
+        //v = 100.0 - i;
         Input[i] = v;
     } 
+    printf("Vetor original de entrada:\n");
     for(int i = 0; i < nTotalElements; i++) printf("[%f] ", Input[i]);
     printf("\n=====\n");
     heap = malloc(sizeof(pair_t) * k);
 
     for(int i = 0; i < k; i++){
+        /*
         heap[i].key = Input[i];
         heap[i].val = i;
+        */
+        printf("passei uma vez\n");
+        insert(heap, i, Input[i]);
     }
-    maxHeapify(heap, k, 0);
-    for(int i = 0; i < nTotalElements; i++){
+    //maxHeapify(heap, k, 0);
+    printf("%i\n", isMaxHeap(heap, k));
+    for(int i = k; i < nTotalElements; i++){
         decreaseMax(heap, k, Input[i], i);
     }
-
+    
+    printf("heap de saida\n");
     for(int i = 0; i < k; i++){
         printf("[%f] ", heap[i].key);
     }
+    
     printf("\n ===================== \n");
 
     //qsort(Input, nTotalElements, sizeof(float), cmpfunc);
