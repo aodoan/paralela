@@ -1,7 +1,7 @@
 # Makefile
 
 TARGET = acharKMenores.out
-CFLAGS = -g -O3 -lm
+CFLAGS = -g -O3 -lm -lpthread
 VPATH = src
 objs = acharKMenores.o utils.o
 PROGRAMS = $(patsubst src/%.c, %, $(wildcard src/*.c))

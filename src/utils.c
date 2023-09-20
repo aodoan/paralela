@@ -8,14 +8,13 @@
 #define SHOW_DECREASE_MAX_STEPS 1
 #define MAX_HEAP_SIZE (1024 * 1024)
 
-
 void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
                   int k) {
     int ok = 1;
 
     pair_t *sortedInput = malloc(sizeof(pair_t) * nTotalElmts);
 
-    for(int i = 0; i < nTotalElmts; ++i){
+    for (int i = 0; i < nTotalElmts; ++i) {
         sortedInput[i].key = Input[i];
         sortedInput[i].val = i;
     }
@@ -26,17 +25,15 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
     qsort(sortedInput, nTotalElmts, sizeof(pair_t), cmpfuncK);
     qsort(sortedOutput, k, sizeof(pair_t), cmpfuncK);
 
-    /* 
-    for(int i = 0; i < nTotalElmts; i++) printf("[%f %i] ", sorted[i].key, sorted[i].val);
-    printf("\n");
-    for(int i = 0; i < k; i++)  printf("[%f %i] ", Output[i].key, Output[i].val);
-    printf("\n");
+    /*
+    for(int i = 0; i < nTotalElmts; i++) printf("[%f %i] ", sorted[i].key,
+    sorted[i].val); printf("\n"); for(int i = 0; i < k; i++)  printf("[%f %i] ",
+    Output[i].key, Output[i].val); printf("\n");
     */
 
-    //verify if the heap is correct
-    for(int i = 0; i < k; i++){
-        if(sortedInput[i].key != sortedOutput[i].key)
-            ok = 0;
+    // verify if the heap is correct
+    for (int i = 0; i < k; i++) {
+        if (sortedInput[i].key != sortedOutput[i].key) ok = 0;
     }
 
     if (ok)
@@ -92,8 +89,7 @@ void maxHeapify(pair_t *heap, int size, int i) {
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
-        if (left < size && heap[left].key > heap[largest].key) 
-            largest = left;
+        if (left < size && heap[left].key > heap[largest].key) largest = left;
 
         if (right < size && heap[right].key > heap[largest].key)
             largest = right;
@@ -115,7 +111,7 @@ void maxHeapify(pair_t *heap, int size, int i) {
 
 inline int parent(int pos) { return ((pos - 1) / 2); }
 
-void heapifyUp(pair_t* heap, int *size, int pos) {
+void heapifyUp(pair_t *heap, int *size, int pos) {
     float val = heap[pos].key;
     while (pos > 0 && val > heap[parent(pos)].key) {
         heap[pos].key = heap[parent(pos)].key;
@@ -125,15 +121,15 @@ void heapifyUp(pair_t* heap, int *size, int pos) {
     heap[pos].key = val;
 }
 
-void insert(pair_t* heap, int size, float element) {
+void insert(pair_t *heap, int size, float element) {
     size += 1;
     int last = size - 1;
     heap[last].key = element;
-    heap[last].val = size-1;
+    heap[last].val = size - 1;
     heapifyUp(heap, &size, last);
 }
 
-int isMaxHeap(pair_t* heap, int size) {
+int isMaxHeap(pair_t *heap, int size) {
     for (int i = 1; i < size; i++)
         if (heap[i].key <= heap[parent(i)].key)
             continue;
@@ -163,7 +159,24 @@ int cmpfunc(const void *a, const void *b) {
 }
 
 int cmpfuncK(const void *A, const void *B) {
-    float fa = ((pair_t*) A)->key;
-    float fb = ((pair_t*) B)->key;
+    float fa = ((pair_t *)A)->key;
+    float fb = ((pair_t *)B)->key;
     return (fa > fb) - (fa < fb);
+}
+
+void *threadedMaxHeap(void *args) {
+    heap_pthread_t *this = (heap_pthread_t *)args;
+    float* inputPointer = this->startPoint;
+    int inputIndex = this->inputIndex;
+
+    this->heap = malloc(sizeof(pair_t) * this->sizeHeap);
+
+    for (int i = 0; i < this->sizeHeap; ++i, ++inputPointer)
+        insert(this->heap, this->sizeHeap, *inputPointer);
+
+    this->sizeSearch -= this->sizeHeap;
+    this->startPoint += sizeof(float) * this->sizeHeap;
+
+    for (; inputPointer != this->endPoint; ++inputPointer, inputIndex++)
+        decreaseMax(this->heap, this->sizeHeap, *inputPointer, inputIndex);
 }

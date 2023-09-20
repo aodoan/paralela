@@ -1,5 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
+
+#include <pthread.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -9,8 +12,20 @@ struct {
     int val;
 } typedef pair_t;
 
+struct {
+    int id;
+    pthread_t thread;
+    pair_t *heap;
+    float *startPoint;
+    float *endPoint;
+    int inputIndex;
+    size_t sizeHeap;
+    size_t sizeSearch;
+} typedef heap_pthread_t;
+
 extern float *Input;
 
+void *threadedMaxHeap(void *arg);
 void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
                   int k);
 void drawHeapTree(int heap[], int size, int nLevels);
