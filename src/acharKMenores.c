@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include "utils.h"
 
@@ -11,41 +12,57 @@ int nTotalElements, k, nThreads;
 float *Input;
 pair_t *heap;
 
-int main(int argc, char **argv){
-    //get parameters from command line
+float* generateInput(int nTotalElements){
+    float* vector = malloc(sizeof(float) * nTotalElements);
+    int a, b;
+    float v;
+
+    srand(time(NULL));
+    for(int i = 0; i < nTotalElements; i++){
+        a = rand();
+        b = rand();
+        v = a * 100.0 + b;
+        vector[i] = v;
+    } 
+
+    return vector;
+}
+
+//get parameters from command line
+void getParams(int argc, char **argv){
     if(argc != 4){
         printf("Erro com os paramêtros.\n");
         exit(1);
     }
     nTotalElements = atoi(argv[1]);
     k = atoi(argv[2]);
-    nThreads = atoi(argv[3]);
-    int a, b;
-    float v;
-    Input = malloc(sizeof(float) * nTotalElements);
+    nThreads = atoi(argv[3]);   
+}
+
+int main(int argc, char **argv){
+    getParams(argc, argv);
     
     srand(time(NULL));
-    for(int i = 0; i < nTotalElements; i++){
-        a = rand();
-        b = rand();
-        v = a * 100.0 + b;
-        Input[i] = v;
-    } 
-    pair_t **heap = malloc(sizeof(pair_t*) * nThreads);
-    for(int i = 0; i < nThreads; i++)
-        heap[i] = malloc(sizeof(pair_t) * k);
+    Input = generateInput(nTotalElements);
     
-    int sizeOfDistribution = floor(nTotalElements / nThreads);
-    //cria uma max heap com os primeiros k elementos do vetor de entrada
+    heap_pthread_t **threads = malloc(sizeof(heap_pthread_t*) * nThreads);
     
-    for(int j = 0, offset = 0; j < nThreads; j++){
-        for(int i = 0; i < k; i++){
-            insert(heap[j], i, Input[i+offset], i+offset);
+    int sizeForEach = floor((double)nTotalElements / nThreads);
+
+    for(size_t i = 0, offset; i < nThreads; i++){
+        threads[i] = malloc(sizeof(heap_pthread_t));
+        threads[i]->startPoint = &Input[offset];
+        if(offset += sizeForEach == nTotalElements){
+        threads[i]->endPoint = &Input[offset + sizeForEach];
+        } else {
+            threads[i]->endPoint = &Input[nTotalElements+1];
         }
-        offset += sizeOfDistribution;
+        threads[i]->sizeHeap = k;
+        threads[i]->sizeSearch = sizeForEach;
+        //threads[i]->id = pthread_create(&threads[i]->thread, NULL, max_heap, (void*)threads[i]);
+        offset += sizeForEach;
     }
     
-
     for(int i = 0; i < nThreads; i++){
         printf("1 heap: ");
         for(int j = 0; j < k && j < nTotalElements; j++)
@@ -53,15 +70,6 @@ int main(int argc, char **argv){
         printf("\n");
     }
     
-    //itera sobre o restante do vetor
-    /*
-    for(int i = k; i < nTotalElements; i++)
-        decreaseMax(heap[0], k, Input[i], i);
-    
-    //qsort(Input, nTotalElements, sizeof(float), cmpfunc);
-    //colocar ifdef aqui
-    verifyOutput(Input, heap[0], nTotalElements, k);
-    */
     pair_t *Output = get_one_heap(heap, nTotalElements, k);
     for(int i = 0; i < k; i++){
         printf("[%f %i] ",Output[i].key, Output[i].val);
