@@ -36,5 +36,5 @@ void insert(pair_t* heap, int size, float element, int val);
 void decreaseMax(pair_t *heap, int size, float new_value, int val);
 int cmpfunc(const void *a, const void *b);
 int cmpfuncK(const void *A, const void *B);
-pair_t *get_one_heap(pair_t **heap_set, int nTotalThreads, int k);
+pair_t *get_one_heap(heap_pthread_t **heap_set, int nTotalThreads, int k);
 #endif

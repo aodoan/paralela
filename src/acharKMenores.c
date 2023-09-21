@@ -48,8 +48,8 @@ int main(int argc, char **argv){
     heap_pthread_t **threads = malloc(sizeof(heap_pthread_t*) * nThreads);
     
     int sizeForEach = floor((double)nTotalElements / nThreads);
-
-    for(size_t i = 0, offset; i < nThreads; i++){
+    int offset = 0;
+    for(size_t i = 0; i < nThreads; i++){
         threads[i] = malloc(sizeof(heap_pthread_t));
         threads[i]->startPoint = &Input[offset];
         if(offset += sizeForEach == nTotalElements){
@@ -60,17 +60,23 @@ int main(int argc, char **argv){
         threads[i]->sizeHeap = k;
         threads[i]->sizeSearch = sizeForEach;
         //threads[i]->id = pthread_create(&threads[i]->thread, NULL, max_heap, (void*)threads[i]);
+        threads[i]->heap = malloc(sizeof(pair_t) * k);
+        for(int j = 0; j < k; j++){
+            insert(threads[i]->heap, j, Input[offset+j], offset+j);            
+        }
+
         offset += sizeForEach;
     }
     
     for(int i = 0; i < nThreads; i++){
-        printf("1 heap: ");
-        for(int j = 0; j < k && j < nTotalElements; j++)
-            printf("[%f %i] ", heap[i][j].key, heap[i][j].val);
+        printf("%i heap: ", i+1);
+        for(int j = 0; j < k; j++)
+            printf("[%f %i] ", threads[i]->heap[j].key, threads[i]->heap[j].val);
         printf("\n");
     }
-    
-    pair_t *Output = get_one_heap(heap, nTotalElements, k);
+    printf("bodia\n");
+    pair_t *Output = get_one_heap(threads, nThreads, k);
+    printf("bodia\n");
     for(int i = 0; i < k; i++){
         printf("[%f %i] ",Output[i].key, Output[i].val);
 

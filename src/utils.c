@@ -125,7 +125,7 @@ void insert(pair_t* heap, int size, float element, int val) {
     size += 1;
     int last = size - 1;
     heap[last].key = element;
-    heap[last].val = size-1;
+    heap[last].val = val;
     heapifyUp(heap, &size, last);
 }
 
@@ -165,27 +165,18 @@ int cmpfuncK(const void *A, const void *B) {
 }
 
 //recebe nTotalThreads heaps e retorna uma max-heap com os k menores elementos
-pair_t *get_one_heap(pair_t **heap_set, int nTotalThreads, int k){
-    pair_t *heap = malloc(sizeof(heap) * k);
-    int counter[nTotalThreads];
-    for(int i = 0; i < nTotalThreads; i++) counter[i] = 0;
+pair_t *get_one_heap(heap_pthread_t **heap_set, int nTotalThreads, int k){
+    pair_t *heap = malloc(sizeof(pair_t) * k);
 
-    pair_t menor;
-    int index;
     for(int i = 0; i < k; i++){
-        menor.key = INT_MAX;
-        index = 0;
-        for(int j = 0; j < nTotalThreads; j++){
-            if(heap_set[j][counter[j]].key < menor.key){
-                menor.key = heap_set[j][counter[j]].key;
-                menor.val = heap_set[j][counter[j]].val;
-                index = j;
-            }
-        }
-        counter[index]++;
-        insert(heap, i, menor.key, menor.val);
+        insert(heap, i, heap_set[0]->heap[i].key, heap_set[0]->heap[i].val);
     }
 
+    for(int i = 1; i < nTotalThreads; i++){
+        for(int j = 0; j < k; j++){
+            decreaseMax(heap, k, heap_set[i]->heap[j].key, heap_set[i]->heap[j].val);
+        }
+    }
     return heap;
 }
 
