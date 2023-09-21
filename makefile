@@ -1,25 +1,31 @@
-# Makefile
+#feito por Chat Gepeto
+# Compiler
+CC = gcc
 
-TARGET = acharKMenores.out
-CFLAGS = -Wall -g -O3 -lm -lpthread
-VPATH = src
-objs = acharKMenores.o utils.o
-PROGRAMS = $(patsubst src/%.c, %, $(wildcard src/*.c))
+# Compiler flags
+CFLAGS = -Wall -Wextra -Isrc -pthread
 
-.PHONY: all clean purge debug
+# Source files
+SRC_DIR = src
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+OBJ_FILES = $(SRC_FILES:$(SRC_DIR)/%.c=%.o)
 
-all: $(PROGRAMS)
-$(PROGRAMS) : $(objs) -lm
+# Output executable
+OUTPUT = acharKMenores
 
-debug: CFLAGS += -DDEBUG
-debug: all
+# Build target
+all: $(OUTPUT)
 
-# ligacao
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@ 
+# Main target
+$(OUTPUT): $(OBJ_FILES)
+	$(CC) $(CFLAGS) -o $@ $^ -lm
 
-# limpeza
+# Compile source files to object files
+%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean generated files
 clean:
-	-rm -f $(objs) *~
-purge: clean
-	-rm -f $(PROGRAMS)
+	rm -f $(OUTPUT) $(OBJ_FILES)
+
+.PHONY: all clean

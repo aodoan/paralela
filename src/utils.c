@@ -9,6 +9,10 @@
 #define SHOW_DECREASE_MAX_STEPS 1
 #define MAX_HEAP_SIZE (1024 * 1024)
 
+int parent(int pos){
+    return ((pos - 1) / 2); 
+}
+
 void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
                   int k) {
     int ok = 1;
@@ -26,17 +30,20 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
     qsort(sortedInput, nTotalElmts, sizeof(pair_t), cmpfuncK);
     qsort(sortedOutput, k, sizeof(pair_t), cmpfuncK);
 
-    /*
-    for(int i = 0; i < nTotalElmts; i++) printf("[%f %i] ", sorted[i].key,
-    sorted[i].val); printf("\n"); for(int i = 0; i < k; i++)  printf("[%f %i] ",
-    Output[i].key, Output[i].val); printf("\n");
-    */
+    
 
     // verify if the heap is correct
     for (int i = 0; i < k; i++) {
         if (sortedInput[i].key != sortedOutput[i].key) ok = 0;
     }
+    /*
 
+    printf("ORIGINAL: ");
+    for(int i = 0; i < nTotalElmts; i++) printf("[%f %i] ", sortedInput[i].key, sortedInput[i].val); 
+    printf("\nSAIDA: "); 
+    
+    for(int i = 0; i < k; i++)  printf("[%f %i] ",sortedOutput[i].key, sortedOutput[i].val); printf("\n");
+    */
     if (ok)
         printf("\nOutput set verified correctly.\n");
     else
@@ -45,14 +52,14 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
 
 void populateInput(int nTotalElements) {
     int a, b;
-    Input = malloc(sizeof(float) * nTotalElements);
+    //Input = malloc(sizeof(float) * nTotalElements);
     for (int i = 0; i < nTotalElements; ++i) {
         a = rand();
         b = rand();
 
         float v = a * 100.0 + b;
 
-        Input[i] = v;
+      //  Input[i] = v;
     }
 }
 
@@ -109,7 +116,7 @@ void maxHeapify(pair_t *heap, int size, int i) {
     }
 }
 
-inline int parent(int pos) { return ((pos - 1) / 2); }
+
 
 void heapifyUp(pair_t *heap, int *size, int pos) {
     float val = heap[pos].key;
@@ -171,7 +178,7 @@ pair_t *get_one_heap(heap_pthread_t **heap_set, int nTotalThreads, int k){
     for(int i = 0; i < k; i++){
         insert(heap, i, heap_set[0]->heap[i].key, heap_set[0]->heap[i].val);
     }
-
+    if(k == 1) return heap;
     for(int i = 1; i < nTotalThreads; i++){
         for(int j = 0; j < k; j++){
             decreaseMax(heap, k, heap_set[i]->heap[j].key, heap_set[i]->heap[j].val);
@@ -196,4 +203,29 @@ void *threadedMaxHeap(void *args) {
 
     for (; inputPointer != this->endPoint; ++inputPointer, ++inputIndex)
         decreaseMax(this->heap, this->sizeHeap, *inputPointer, inputIndex);
+}
+
+
+void *bodyThread(void *arg){
+    heap_pthread_t *info = (heap_pthread_t *) arg;
+    for(int j = 0; j < info->heapS; j++){
+            insert(info->heap, j, info->Input[info->start_index+j], info->start_index+j);            
+        }
+    for(int i = info->heapS; i < info->sizeSearch; i++){
+        decreaseMax(info->heap, info->heapS, info->Input[info->start_index + i], info->start_index + i);
+    }
+    /*
+    for(int i = 0; i < info->heapS; i++)
+        printf("[%f %i] ", info->heap[i].key, info->heap[i].val);
+    printf("\n");
+    */
+    pthread_exit(NULL); //finalização da thread
+
+}
+
+double timestamp(void)
+{
+  struct timeval tp;
+  gettimeofday(&tp, NULL);
+  return((double)(tp.tv_sec*1000.0 + tp.tv_usec/1000.0));
 }

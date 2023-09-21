@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <time.h>
 
 struct {
@@ -21,9 +22,13 @@ struct {
     int inputIndex;
     size_t sizeHeap;
     size_t sizeSearch;
+    int heapS;
+    int start_index;
+    int end_index;
+    float *Input;
 } typedef heap_pthread_t;
 
-extern float *Input;
+//extern float *Input;
 
 void *threadedMaxHeap(void *arg);
 void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
@@ -37,4 +42,8 @@ void decreaseMax(pair_t *heap, int size, float new_value, int val);
 int cmpfunc(const void *a, const void *b);
 int cmpfuncK(const void *A, const void *B);
 pair_t *get_one_heap(heap_pthread_t **heap_set, int nTotalThreads, int k);
+void *bodyThread(void *arg);
+void *threadedMaxHeap(void *args);
+int parent(int pos);
+double timestamp(void);
 #endif
