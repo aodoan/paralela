@@ -44,24 +44,12 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
     
     for(int i = 0; i < k; i++)  printf("[%f %i] ",sortedOutput[i].key, sortedOutput[i].val); printf("\n");
     */
-    if (ok)
+    if (ok == 1)
         printf("\nOutput set verified correctly.\n");
     else
         printf("\nOutput set DID NOT compute correctly!!!\n");
 }
 
-void populateInput(int nTotalElements) {
-    int a, b;
-    //Input = malloc(sizeof(float) * nTotalElements);
-    for (int i = 0; i < nTotalElements; ++i) {
-        a = rand();
-        b = rand();
-
-        float v = a * 100.0 + b;
-
-      //  Input[i] = v;
-    }
-}
 
 void drawHeapTree(int heap[], int size, int nLevels)  // FIX ME!
 {
@@ -118,7 +106,7 @@ void maxHeapify(pair_t *heap, int size, int i) {
 
 
 
-void heapifyUp(pair_t *heap, int *size, int pos) {
+void heapifyUp(pair_t *heap, int pos) {
     float val = heap[pos].key;
     while (pos > 0 && val > heap[parent(pos)].key) {
         heap[pos].key = heap[parent(pos)].key;
@@ -133,7 +121,7 @@ void insert(pair_t* heap, int size, float element, int val) {
     int last = size - 1;
     heap[last].key = element;
     heap[last].val = val;
-    heapifyUp(heap, &size, last);
+    heapifyUp(heap, last);
 }
 
 int isMaxHeap(pair_t *heap, int size) {
@@ -187,7 +175,7 @@ pair_t *get_one_heap(heap_pthread_t **heap_set, int nTotalThreads, int k){
     return heap;
 }
 
-
+/*
 void *threadedMaxHeap(void *args) {
     heap_pthread_t *this = (heap_pthread_t *)args;
     float* inputPointer = this->startPoint;
@@ -204,7 +192,7 @@ void *threadedMaxHeap(void *args) {
     for (; inputPointer != this->endPoint; ++inputPointer, ++inputIndex)
         decreaseMax(this->heap, this->sizeHeap, *inputPointer, inputIndex);
 }
-
+*/
 
 void *bodyThread(void *arg){
     heap_pthread_t *info = (heap_pthread_t *) arg;
@@ -214,11 +202,7 @@ void *bodyThread(void *arg){
     for(int i = info->heapS; i < info->sizeSearch; i++){
         decreaseMax(info->heap, info->heapS, info->Input[info->start_index + i], info->start_index + i);
     }
-    /*
-    for(int i = 0; i < info->heapS; i++)
-        printf("[%f %i] ", info->heap[i].key, info->heap[i].val);
-    printf("\n");
-    */
+    
     pthread_exit(NULL); //finalização da thread
 
 }

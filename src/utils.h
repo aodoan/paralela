@@ -5,28 +5,28 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <sys/time.h>
 #include <time.h>
 
-struct {
+typedef struct {
     float key;
     int val;
-} typedef pair_t;
+} pair_t;
 
-struct {
+typedef struct {
     int id;
     pthread_t thread;
     pair_t *heap;
     float *startPoint;
     float *endPoint;
     int inputIndex;
-    size_t sizeHeap;
-    size_t sizeSearch;
+    int sizeHeap;
+    int sizeSearch;
     int heapS;
     int start_index;
     int end_index;
     float *Input;
-} typedef heap_pthread_t;
+} heap_pthread_t;
 
 //extern float *Input;
 
@@ -34,7 +34,7 @@ void *threadedMaxHeap(void *arg);
 void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
                   int k);
 void drawHeapTree(int heap[], int size, int nLevels);
-// void maxHeapify(pair_t *heap, int size, int i);
+void maxHeapify(pair_t *heap, int size, int i);
 // void heapifyUp(pair_t* heap, int *size, int pos);
 // int isMaxHeap(pair_t* heap, int size);
 void insert(pair_t* heap, int size, float element, int val);

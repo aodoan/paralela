@@ -3,7 +3,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -Isrc -pthread
+CFLAGS = -O3 -Wall -Wextra -Isrc -pthread
 
 # Source files
 SRC_DIR = src
@@ -14,7 +14,7 @@ OBJ_FILES = $(SRC_FILES:$(SRC_DIR)/%.c=%.o)
 OUTPUT = acharKMenores
 
 # Build target
-all: $(OUTPUT)
+all: $(OUTPUT) clean
 
 # Main target
 $(OUTPUT): $(OBJ_FILES)
@@ -26,6 +26,9 @@ $(OUTPUT): $(OBJ_FILES)
 
 # Clean generated files
 clean:
-	rm -f $(OUTPUT) $(OBJ_FILES)
+	rm -f $(OBJ_FILES)
+
+purge:
+	rm -f $(OBJ_FILES) $(OUTPUT)
 
 .PHONY: all clean
