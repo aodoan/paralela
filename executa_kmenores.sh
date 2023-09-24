@@ -1,5 +1,5 @@
 #resultados vao para a saida padrao.
-NUMELEMENTOS=20000000
+NUMELEMENTOS=200000000
 K=200
 
 echo "Testes para ${NUMELEMENTOS} elementos com k = ${K} "
