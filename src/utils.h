@@ -1,3 +1,7 @@
+// Autores
+// Claudinei Aparecido Alduan Filho GRR20203920
+// Rodrigo Saviam Soffner GRR20205092
+
 #ifndef UTILS_H
 #define UTILS_H
 
@@ -14,7 +18,6 @@ typedef struct {
     pair_t *heap;
 
     float *startPoint;
-    long int MOP;
     int heapSize;
     int searchSize;
     int startIndex;
@@ -27,7 +30,6 @@ pair_t *join_heaps(heap_pthread_t **heap_set, int nTotalThreads, int k);
 
 void *bodyThread(void *arg);
 void *threadedMaxHeap(void *args);
-pair_t *sequencial(float *Input, int nTotalElements, int k, long int *MOP);
-double timestamp(void);
+pair_t *sequencial(float *Input, int nTotalElements, int k);
 
 #endif

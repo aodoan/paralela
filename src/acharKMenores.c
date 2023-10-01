@@ -1,9 +1,14 @@
+// Autores
+// Claudinei Aparecido Alduan Filho GRR20203920
+// Rodrigo Saviam Soffner GRR20205092
+
 #include <math.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "chrono.h"
 #include "utils.h"
 
 // 1 -> roda o verify
@@ -19,7 +24,6 @@ heap_pthread_t *create_heap_pthread(int offset, int sizeForEach, int i) {
 
     thread->startIndex = offset;
     thread->startPoint = &Input[offset];
-    thread->MOP = 0;
     thread->heapSize = k;
     thread->searchSize = sizeForEach;
     thread->heap = malloc(sizeof(pair_t) * k);
@@ -67,8 +71,10 @@ int main(int argc, char **argv) {
     srand(time(NULL));
 
     Input = generateInput(nTotalElements);
-    double timer = -timestamp();
-    long int MOP = 0;
+    chronometer_t chrono;
+    chrono_reset(&chrono);
+    chrono_start(&chrono);
+
     if (nThreads > 1) {
 #if TEST_OUTPUT == 1
         printf("paralelizado com %i threads\n", nThreads);
@@ -85,9 +91,7 @@ int main(int argc, char **argv) {
 
         for (int i = 0; i < nThreads; i++) {
             pthread_join(threads[i]->thread, NULL);
-            MOP += threads[i]->MOP;
         }
-        printf("%li\n", MOP);
 
         Output = join_heaps(threads, nThreads, k);
 
@@ -95,17 +99,22 @@ int main(int argc, char **argv) {
 #if TEST_OUTPUT == 1
         printf("sequencial\n");
 #endif
-        Output = sequencial(Input, nTotalElements, k, &MOP);
+        Output = sequencial(Input, nTotalElements, k);
     }
 
-    timer += timestamp();
-    double MOPs = (double) MOP / timer;
-    printf("%f\n", timer);
-    printf("MOPs %f\n", MOPs);
+    chrono_stop(&chrono);
 
-    if (TEST_OUTPUT == 1) {
-        verifyOutput(Input, Output, nTotalElements, k);
-        printf("\n");
-    }
+    chrono_reportTime(&chrono, "parallelReductionTime");
+    double total_time_in_seconds =
+        (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
+    printf("total_time_in_seconds: %lf s\n", total_time_in_seconds);
+
+    double OPS = (nTotalElements) / total_time_in_seconds;
+    printf("Throughput: %lf OP/s\n", OPS);
+
+#if TEST_OUTPUT == 1
+    verifyOutput(Input, Output, nTotalElements, k);
+    printf("\n");
+#endif
     return 0;
 }

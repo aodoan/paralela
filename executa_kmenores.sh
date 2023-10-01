@@ -1,3 +1,6 @@
+# Autores
+# Claudinei Aparecido Alduan Filho GRR20203920
+# Rodrigo Saviam Soffner GRR20205092
 #resultados vao para a saida padrao.
 NUMELEMENTOS=200000000
 K=200
