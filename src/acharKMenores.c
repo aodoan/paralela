@@ -8,7 +8,7 @@
 
 // 1 -> roda o verify
 // 2 -> skipa verify
-#define TEST_OUTPUT 2
+#define TEST_OUTPUT 1
 
 int nTotalElements, k, nThreads;
 float *Input;
@@ -19,7 +19,7 @@ heap_pthread_t *create_heap_pthread(int offset, int sizeForEach, int i) {
 
     thread->startIndex = offset;
     thread->startPoint = &Input[offset];
-
+    thread->MOP = 0;
     thread->heapSize = k;
     thread->searchSize = sizeForEach;
     thread->heap = malloc(sizeof(pair_t) * k);

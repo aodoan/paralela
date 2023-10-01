@@ -39,15 +39,6 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
         if (sortedInput[i].key != sortedOutput[i].key) ok = 0;
     }
 
-    // printf("ORIGINAL: ");
-    // for (int i = 0; i < nTotalElmts; i++)
-    //     printf("[%f %i] ", sortedInput[i].key, sortedInput[i].val);
-    // printf("\nSAIDA: ");
-
-    // for (int i = 0; i < k; i++)
-    //     printf("[%f %i] ", sortedOutput[i].key, sortedOutput[i].val);
-    // printf("\n");
-
     if (ok == 1)
         printf("\nOutput set verified correctly.\n");
     else
@@ -134,15 +125,19 @@ void *threadedMaxHeap(void *args) {
     int i = 0;
     double timer = -timestamp();
 
-    for (; i < this->heapSize; ++i, ++inputPointer, ++inputIndex)
+    for (; i < this->heapSize; ++i, ++inputPointer, ++inputIndex){
+        this->MOP++;
         insert(this->heap, i, *inputPointer, inputIndex);
+    }
 
-    for (; i < this->searchSize; ++inputPointer, ++inputIndex, ++i)
+    for (; i < this->searchSize; ++inputPointer, ++inputIndex, ++i){
+        this->MOP++;
         decreaseMax(this->heap, this->heapSize, *inputPointer, inputIndex);
+    }
 
     timer += timestamp();
     printf("Thread %i: %f ms\n", this->id, timer);
-
+    printf("MOP = %li\n", this->MOP);
     pthread_exit(NULL);
 }
 
@@ -166,15 +161,17 @@ void *bodyThread(void *arg) {
 
 pair_t *sequencial(float *Input, int nTotalElements, int k) {
     pair_t *heap = malloc(sizeof(pair_t) * k);
-
+    long int MOP = 0;
     for (int i = 0; i < k; i++) {
+        MOP++;
         insert(heap, i, Input[i], i);
     }
 
-    for (int i = 0; i < nTotalElements; i++) {
+    for (int i = k; i < nTotalElements; i++) {
+        MOP++;
         decreaseMax(heap, k, Input[i], i);
     }
-
+    printf("%li\n", MOP);
     return heap;
 }
 

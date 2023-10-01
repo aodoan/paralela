@@ -14,7 +14,7 @@ typedef struct {
     pair_t *heap;
 
     float *startPoint;
-
+    long int MOP;
     int heapSize;
     int searchSize;
     int startIndex;
