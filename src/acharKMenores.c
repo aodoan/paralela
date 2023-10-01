@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 
     Input = generateInput(nTotalElements);
     double timer = -timestamp();
-
+    long int MOP = 0;
     if (nThreads > 1) {
 #if TEST_OUTPUT == 1
         printf("paralelizado com %i threads\n", nThreads);
@@ -85,7 +85,9 @@ int main(int argc, char **argv) {
 
         for (int i = 0; i < nThreads; i++) {
             pthread_join(threads[i]->thread, NULL);
+            MOP += threads[i]->MOP;
         }
+        printf("%li\n", MOP);
 
         Output = join_heaps(threads, nThreads, k);
 
@@ -93,12 +95,13 @@ int main(int argc, char **argv) {
 #if TEST_OUTPUT == 1
         printf("sequencial\n");
 #endif
-        Output = sequencial(Input, nTotalElements, k);
+        Output = sequencial(Input, nTotalElements, k, &MOP);
     }
 
     timer += timestamp();
-
+    double MOPs = (double) MOP / timer;
     printf("%f\n", timer);
+    printf("MOPs %f\n", MOPs);
 
     if (TEST_OUTPUT == 1) {
         verifyOutput(Input, Output, nTotalElements, k);

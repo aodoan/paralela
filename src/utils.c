@@ -159,19 +159,20 @@ void *bodyThread(void *arg) {
     pthread_exit(NULL);  // finalização da thread
 }
 
-pair_t *sequencial(float *Input, int nTotalElements, int k) {
+pair_t *sequencial(float *Input, int nTotalElements, int k, long int *MOP) {
     pair_t *heap = malloc(sizeof(pair_t) * k);
-    long int MOP = 0;
+    long int M = 0;
     for (int i = 0; i < k; i++) {
-        MOP++;
+        M++;
         insert(heap, i, Input[i], i);
     }
 
     for (int i = k; i < nTotalElements; i++) {
-        MOP++;
+        M++;
         decreaseMax(heap, k, Input[i], i);
     }
-    printf("%li\n", MOP);
+    printf("%li\n", M);
+    *MOP = M;
     return heap;
 }
 

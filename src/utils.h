@@ -27,8 +27,7 @@ pair_t *join_heaps(heap_pthread_t **heap_set, int nTotalThreads, int k);
 
 void *bodyThread(void *arg);
 void *threadedMaxHeap(void *args);
-pair_t *sequencial(float *Input, int nTotalElements, int k);
-
+pair_t *sequencial(float *Input, int nTotalElements, int k, long int *MOP);
 double timestamp(void);
 
 #endif
