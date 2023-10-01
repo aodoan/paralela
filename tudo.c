@@ -15,7 +15,7 @@
 
 // 1 -> roda o verify
 // 2 -> skipa verify
-#define TEST_OUTPUT 2
+#define TEST_OUTPUT 1
 #define SHOW_DECREASE_MAX_STEPS 1
 #define MAX_HEAP_SIZE (1024 * 1024)
 
