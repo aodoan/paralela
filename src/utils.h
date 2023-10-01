@@ -17,6 +17,8 @@ typedef struct {
     pthread_t thread;
     pair_t *heap;
 
+    pthread_barrier_t *start_barrier;
+
     float *startPoint;
     int heapSize;
     int searchSize;

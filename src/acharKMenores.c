@@ -19,13 +19,15 @@ int nTotalElements, k, nThreads;
 float *Input;
 pair_t *Output;
 
-heap_pthread_t *create_heap_pthread(int offset, int sizeForEach, int i) {
+heap_pthread_t *create_heap_pthread(int offset, int sizeForEach, int i,
+                                    pthread_barrier_t *start_barrier) {
     heap_pthread_t *thread = malloc(sizeof(heap_pthread_t));
 
     thread->startIndex = offset;
     thread->startPoint = &Input[offset];
     thread->heapSize = k;
     thread->searchSize = sizeForEach;
+    thread->start_barrier = start_barrier;
     thread->heap = malloc(sizeof(pair_t) * k);
     thread->id = i;
     int res =
@@ -69,25 +71,31 @@ int main(int argc, char **argv) {
     getParams(argc, argv);
 
     srand(time(NULL));
-
     Input = generateInput(nTotalElements);
     chronometer_t chrono;
+
     chrono_reset(&chrono);
-    chrono_start(&chrono);
 
     if (nThreads > 1) {
 #if TEST_OUTPUT == 1
         printf("paralelizado com %i threads\n", nThreads);
 #endif
+        pthread_barrier_t start_barrier;
+        pthread_barrier_init(&start_barrier, NULL, nThreads + 1);
         heap_pthread_t **threads = malloc(sizeof(heap_pthread_t *) * nThreads);
 
         int offset = 0;
         int sizeForEach = floor((double)nTotalElements / nThreads);
 
         for (int i = 0; i < nThreads; i++) {
-            threads[i] = create_heap_pthread(offset, sizeForEach, i);
+            threads[i] =
+                create_heap_pthread(offset, sizeForEach, i, &start_barrier);
             offset += sizeForEach;
         }
+        pthread_barrier_wait(&start_barrier);
+        chrono_start(&chrono);
+        pthread_barrier_wait(&start_barrier);
+        chrono_stop(&chrono);
 
         for (int i = 0; i < nThreads; i++) {
             pthread_join(threads[i]->thread, NULL);
@@ -99,7 +107,9 @@ int main(int argc, char **argv) {
 #if TEST_OUTPUT == 1
         printf("sequencial\n");
 #endif
+        chrono_start(&chrono);
         Output = sequencial(Input, nTotalElements, k);
+        chrono_stop(&chrono);
     }
 
     chrono_stop(&chrono);

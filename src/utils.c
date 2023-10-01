@@ -127,6 +127,8 @@ void *threadedMaxHeap(void *args) {
     float *inputPointer = this->startPoint;
     int inputIndex = this->startIndex;
     int i = 0;
+    
+    pthread_barrier_wait(this->start_barrier);    
 
     for (; i < this->heapSize; ++i, ++inputPointer, ++inputIndex){
         insert(this->heap, i, *inputPointer, inputIndex);
@@ -136,25 +138,8 @@ void *threadedMaxHeap(void *args) {
         decreaseMax(this->heap, this->heapSize, *inputPointer, inputIndex);
     }
 
+    pthread_barrier_wait(this->start_barrier);
     pthread_exit(NULL);
-}
-
-void *bodyThread(void *arg) {
-    heap_pthread_t *this = (heap_pthread_t *)arg;
-    float *Input = this->startPoint;
-    int i = 0;
-
-    for (; i < this->heapSize; i++) {
-        insert(this->heap, i, Input[this->startIndex + i],
-               this->startIndex + i);
-    }
-
-    for (; i < this->searchSize; i++) {
-        decreaseMax(this->heap, this->heapSize, Input[this->startIndex + i],
-                    this->startIndex + i);
-    }
-
-    pthread_exit(NULL);  // finalização da thread
 }
 
 pair_t *sequencial(float *Input, int nTotalElements, int k) {
