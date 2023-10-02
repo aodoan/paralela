@@ -65,6 +65,18 @@ void getParams(int argc, char **argv) {
     nTotalElements = atoi(argv[1]);
     k = atoi(argv[2]);
     nThreads = atoi(argv[3]);
+    if (nTotalElements <= 0) {
+        printf("nTotalElements deve ser maior que 0\n");
+        exit(1);
+    }
+    if (k <= 0) {
+        printf("k deve ser maior que 0\n");
+        exit(1);
+    }
+    if (nThreads <= 0) {
+        printf("nThreads deve ser maior que 0\n");
+        exit(1);
+    }
 }
 
 int main(int argc, char **argv) {
@@ -76,43 +88,31 @@ int main(int argc, char **argv) {
 
     chrono_reset(&chrono);
 
-    if (nThreads > 1) {
 #if TEST_OUTPUT == 1
-        printf("paralelizado com %i threads\n", nThreads);
+    printf("paralelizado com %i threads\n", nThreads);
 #endif
-        pthread_barrier_t start_barrier;
-        pthread_barrier_init(&start_barrier, NULL, nThreads + 1);
-        heap_pthread_t **threads = malloc(sizeof(heap_pthread_t *) * nThreads);
+    pthread_barrier_t start_barrier;
+    pthread_barrier_init(&start_barrier, NULL, nThreads + 1);
+    heap_pthread_t **threads = malloc(sizeof(heap_pthread_t *) * nThreads);
 
-        int offset = 0;
-        int sizeForEach = floor((double)nTotalElements / nThreads);
+    int offset = 0;
+    int sizeForEach = floor((double)nTotalElements / nThreads);
 
-        for (int i = 0; i < nThreads; i++) {
-            threads[i] =
-                create_heap_pthread(offset, sizeForEach, i, &start_barrier);
-            offset += sizeForEach;
-        }
-        pthread_barrier_wait(&start_barrier);
-        chrono_start(&chrono);
-        pthread_barrier_wait(&start_barrier);
-        chrono_stop(&chrono);
+    for (int i = 0; i < nThreads; i++) {
+        threads[i] =
+            create_heap_pthread(offset, sizeForEach, i, &start_barrier);
+        offset += sizeForEach;
+    }
+    pthread_barrier_wait(&start_barrier);
+    chrono_start(&chrono);
+    pthread_barrier_wait(&start_barrier);
+    chrono_stop(&chrono);
 
-        for (int i = 0; i < nThreads; i++) {
-            pthread_join(threads[i]->thread, NULL);
-        }
-
-        Output = join_heaps(threads, nThreads, k);
-
-    } else {
-#if TEST_OUTPUT == 1
-        printf("sequencial\n");
-#endif
-        chrono_start(&chrono);
-        Output = sequencial(Input, nTotalElements, k);
-        chrono_stop(&chrono);
+    for (int i = 0; i < nThreads; i++) {
+        pthread_join(threads[i]->thread, NULL);
     }
 
-    chrono_stop(&chrono);
+    Output = join_heaps(threads, nThreads, k);
 
     // chrono_reportTime(&chrono, "parallelReductionTime");
     double total_time_in_seconds =
