@@ -1,6 +1,7 @@
 // Autores
 // Claudinei Aparecido Alduan Filho GRR20203920
 // Rodrigo Saviam Soffner GRR20205092
+// gcc -Wall -o acharKmenores acharKmenores.c -lpthread -lm
 
 #include <math.h>
 #include <pthread.h>
