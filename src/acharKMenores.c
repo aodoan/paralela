@@ -45,13 +45,13 @@ float *generateInput(int nTotalElements) {
     int a, b;
     float v;
 
-    // srand(1);
-    // for (int i = 0; i < nTotalElements; i++) {
-    //     a = rand();
-    //     b = rand();
-    //     v = a * 100.0 + b;
-    //     vector[i] = v;
-    // }
+    srand(1);
+    for (int i = 0; i < nTotalElements; i++) {
+        a = rand();
+        b = rand();
+        v = a * 100.0 + b;
+        vector[i] = v;
+    }
 
     return vector;
 }
