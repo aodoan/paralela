@@ -2,8 +2,8 @@
 # Claudinei Aparecido Alduan Filho GRR20203920
 # Rodrigo Saviam Soffner GRR20205092
 #resultados vao para a saida padrao.
-NUMELEMENTOS=10000000000
-K=100
+NUMELEMENTOS=5000000000
+K=200
 
 for i in {1..8} 
 do
