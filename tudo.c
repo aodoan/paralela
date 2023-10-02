@@ -2,16 +2,11 @@
 // Claudinei Aparecido Alduan Filho GRR20203920
 // Rodrigo Saviam Soffner GRR20205092
 
-// Autores
-// Claudinei Aparecido Alduan Filho GRR20203920
-// Rodrigo Saviam Soffner GRR20205092
-
 #include <math.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 
 // 1 -> roda o verify
 // 2 -> skipa verify
@@ -29,12 +24,17 @@ typedef struct {
     pthread_t thread;
     pair_t *heap;
 
-    float *startPoint;
+    pthread_barrier_t *start_barrier;
 
+    float *startPoint;
     int heapSize;
     int searchSize;
     int startIndex;
 } heap_pthread_t;
+
+int nTotalElements, k, nThreads;
+float *Input;
+pair_t *Output;
 
 int parent(int pos) { return ((pos - 1) / 2); }
 
@@ -61,6 +61,7 @@ void verifyOutput(const float *Input, const pair_t *Output, int nTotalElmts,
     qsort(sortedInput, nTotalElmts, sizeof(pair_t), cmpfuncK);
     qsort(sortedOutput, k, sizeof(pair_t), cmpfuncK);
 
+    // verify if the heap is correct
     for (int i = 0; i < k; i++) {
         if (sortedInput[i].key != sortedOutput[i].key) ok = 0;
     }
@@ -149,60 +150,30 @@ void *threadedMaxHeap(void *args) {
     float *inputPointer = this->startPoint;
     int inputIndex = this->startIndex;
     int i = 0;
+    
+    pthread_barrier_wait(this->start_barrier);    
 
-    for (; i < this->heapSize; ++i, ++inputPointer, ++inputIndex)
+    for (; i < this->heapSize; ++i, ++inputPointer, ++inputIndex){
         insert(this->heap, i, *inputPointer, inputIndex);
+    }
 
-    for (; i < this->searchSize; ++inputPointer, ++inputIndex, ++i)
+    for (; i < this->searchSize; ++inputPointer, ++inputIndex, ++i){
         decreaseMax(this->heap, this->heapSize, *inputPointer, inputIndex);
+    }
 
+    pthread_barrier_wait(this->start_barrier);
     pthread_exit(NULL);
 }
 
-void *bodyThread(void *arg) {
-    heap_pthread_t *this = (heap_pthread_t *)arg;
-    float *Input = this->startPoint;
-    int i = 0;
-
-    for (; i < this->heapSize; i++) {
-        insert(this->heap, i, Input[this->startIndex + i],
-               this->startIndex + i);
-    }
-
-    for (; i < this->searchSize; i++) {
-        decreaseMax(this->heap, this->heapSize, Input[this->startIndex + i],
-                    this->startIndex + i);
-    }
-
-    pthread_exit(NULL);
-}
-
-pair_t *sequencial(float *Input, int nTotalElements, int k) {
-    pair_t *heap = malloc(sizeof(pair_t) * k);
-
-    for (int i = 0; i < k; i++) {
-        insert(heap, i, Input[i], i);
-    }
-
-    for (int i = 0; i < nTotalElements; i++) {
-        decreaseMax(heap, k, Input[i], i);
-    }
-
-    return heap;
-}
-
-int nTotalElements, k, nThreads;
-float *Input;
-pair_t *Output;
-
-heap_pthread_t *create_heap_pthread(int offset, int sizeForEach, int i) {
+heap_pthread_t *create_heap_pthread(int offset, int sizeForEach, int i,
+                                    pthread_barrier_t *start_barrier) {
     heap_pthread_t *thread = malloc(sizeof(heap_pthread_t));
 
     thread->startIndex = offset;
     thread->startPoint = &Input[offset];
-
     thread->heapSize = k;
     thread->searchSize = sizeForEach;
+    thread->start_barrier = start_barrier;
     thread->heap = malloc(sizeof(pair_t) * k);
     thread->id = i;
     int res =
@@ -240,46 +211,55 @@ void getParams(int argc, char **argv) {
     nTotalElements = atoi(argv[1]);
     k = atoi(argv[2]);
     nThreads = atoi(argv[3]);
+    if (nTotalElements <= 0) {
+        printf("nTotalElements deve ser maior que 0\n");
+        exit(1);
+    }
+    if (k <= 0) {
+        printf("k deve ser maior que 0\n");
+        exit(1);
+    }
+    if (nThreads <= 0) {
+        printf("nThreads deve ser maior que 0\n");
+        exit(1);
+    }
 }
 
 int main(int argc, char **argv) {
     getParams(argc, argv);
 
     srand(time(NULL));
-
     Input = generateInput(nTotalElements);
 
-    if (nThreads > 1) {
 #if TEST_OUTPUT == 1
-        printf("paralelizado com %i threads\n", nThreads);
+    printf("paralelizado com %i threads\n", nThreads);
 #endif
-        heap_pthread_t **threads = malloc(sizeof(heap_pthread_t *) * nThreads);
+    pthread_barrier_t start_barrier;
+    pthread_barrier_init(&start_barrier, NULL, nThreads + 1);
+    heap_pthread_t **threads = malloc(sizeof(heap_pthread_t *) * nThreads);
 
-        int offset = 0;
-        int sizeForEach = floor((double)nTotalElements / nThreads);
+    int offset = 0;
+    int sizeForEach = floor((double)nTotalElements / nThreads);
 
-        for (int i = 0; i < nThreads; i++) {
-            threads[i] = create_heap_pthread(offset, sizeForEach, i);
-            offset += sizeForEach;
-        }
+    for (int i = 0; i < nThreads; i++) {
+        threads[i] =
+            create_heap_pthread(offset, sizeForEach, i, &start_barrier);
+        offset += sizeForEach;
+    }
+    //Barreira para contadores
+    pthread_barrier_wait(&start_barrier);
+    pthread_barrier_wait(&start_barrier);
 
-        for (int i = 0; i < nThreads; i++) {
-            pthread_join(threads[i]->thread, NULL);
-        }
-
-        Output = join_heaps(threads, nThreads, k);
-
-    } else {
-#if TEST_OUTPUT == 1
-        printf("sequencial\n");
-#endif
-        Output = sequencial(Input, nTotalElements, k);
+    for (int i = 0; i < nThreads; i++) {
+        pthread_join(threads[i]->thread, NULL);
     }
 
+    Output = join_heaps(threads, nThreads, k);
+
 #if TEST_OUTPUT == 1
+    printf("Verificando OUTPUT\n");
     verifyOutput(Input, Output, nTotalElements, k);
     printf("\n");
 #endif
-
     return 0;
 }

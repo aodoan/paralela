@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 
 #define SHOW_DECREASE_MAX_STEPS 1
 #define MAX_HEAP_SIZE (1024 * 1024)
