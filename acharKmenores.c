@@ -231,6 +231,9 @@ int main(int argc, char **argv) {
 
     srand(time(NULL));
     Input = generateInput(nTotalElements);
+    chronometer_t chrono;
+
+    chrono_reset(&chrono);
 
 #if TEST_OUTPUT == 1
     printf("paralelizado com %i threads\n", nThreads);
@@ -247,9 +250,10 @@ int main(int argc, char **argv) {
             create_heap_pthread(offset, sizeForEach, i, &start_barrier);
         offset += sizeForEach;
     }
-    //Barreira para contadores
     pthread_barrier_wait(&start_barrier);
+    chrono_start(&chrono);
     pthread_barrier_wait(&start_barrier);
+    chrono_stop(&chrono);
 
     for (int i = 0; i < nThreads; i++) {
         pthread_join(threads[i]->thread, NULL);
@@ -257,8 +261,15 @@ int main(int argc, char **argv) {
 
     Output = join_heaps(threads, nThreads, k);
 
+    // chrono_reportTime(&chrono, "parallelReductionTime");
+    double total_time_in_seconds =
+        (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
+    printf("%lf\n", total_time_in_seconds);
+
+    // double OPS = (nTotalElements) / total_time_in_seconds;
+    // printf("Throughput: %lf OP/s\n", OPS);
+
 #if TEST_OUTPUT == 1
-    printf("Verificando OUTPUT\n");
     verifyOutput(Input, Output, nTotalElements, k);
     printf("\n");
 #endif
