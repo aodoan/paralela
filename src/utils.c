@@ -121,6 +121,7 @@ pair_t *join_heaps(heap_pthread_t **heap_set, int nTotalThreads, int k) {
     return heap;
 }
 
+//pThread body realiza o max-heap em uma região delimitada do Input. Atua em cima da struct heap_pthread_t passada como ponteiro void
 void *threadedMaxHeap(void *args) {
     heap_pthread_t *this = (heap_pthread_t *)args;
     float *inputPointer = this->startPoint;
@@ -139,18 +140,4 @@ void *threadedMaxHeap(void *args) {
 
     pthread_barrier_wait(this->start_barrier);
     pthread_exit(NULL);
-}
-
-pair_t *sequencial(float *Input, int nTotalElements, int k) {
-    pair_t *heap = malloc(sizeof(pair_t) * k);
-    int i;
-
-    for (i = 0; i < k; i++) {
-        insert(heap, i, Input[i], i);
-    }
-
-    for (; i < nTotalElements; i++) {
-        decreaseMax(heap, k, Input[i], i);
-    }
-    return heap;
 }

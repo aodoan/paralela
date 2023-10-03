@@ -9,9 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-// 1 -> roda o verify
-// 2 -> skipa verify
-#define TEST_OUTPUT 1
+//#include "utils.c"
+//Injeção do utils.c + structs do utils.h
 #define SHOW_DECREASE_MAX_STEPS 1
 #define MAX_HEAP_SIZE (1024 * 1024)
 
@@ -32,10 +31,6 @@ typedef struct {
     int searchSize;
     int startIndex;
 } heap_pthread_t;
-
-int nTotalElements, k, nThreads;
-float *Input;
-pair_t *Output;
 
 int parent(int pos) { return ((pos - 1) / 2); }
 
@@ -146,6 +141,7 @@ pair_t *join_heaps(heap_pthread_t **heap_set, int nTotalThreads, int k) {
     return heap;
 }
 
+//pThread body realiza o max-heap em uma região delimitada do Input. Atua em cima da struct heap_pthread_t passada como ponteiro void
 void *threadedMaxHeap(void *args) {
     heap_pthread_t *this = (heap_pthread_t *)args;
     float *inputPointer = this->startPoint;
@@ -165,6 +161,15 @@ void *threadedMaxHeap(void *args) {
     pthread_barrier_wait(this->start_barrier);
     pthread_exit(NULL);
 }
+//Fim do arquivo utils.c
+
+// 1 -> Modo de check de output
+// 2 -> Modo de metricas
+#define TEST_OUTPUT 2
+
+int nTotalElements, k, nThreads;
+float *Input;
+pair_t *Output;
 
 heap_pthread_t *create_heap_pthread(int offset, int sizeForEach, int i,
                                     pthread_barrier_t *start_barrier) {
@@ -250,6 +255,8 @@ int main(int argc, char **argv) {
             create_heap_pthread(offset, sizeForEach, i, &start_barrier);
         offset += sizeForEach;
     }
+
+    // Realizar os calculos de tempo de execução mais precisamente
     pthread_barrier_wait(&start_barrier);
     chrono_start(&chrono);
     pthread_barrier_wait(&start_barrier);
@@ -261,13 +268,15 @@ int main(int argc, char **argv) {
 
     Output = join_heaps(threads, nThreads, k);
 
-    // chrono_reportTime(&chrono, "parallelReductionTime");
+#if TEST_OUTPUT == 1
+    chrono_reportTime(&chrono, "parallelReductionTime");
+    double OPS = (nTotalElements) / total_time_in_seconds;
+    printf("Throughput: %lf OP/s\n", OPS);
+#else
     double total_time_in_seconds =
         (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
     printf("%lf\n", total_time_in_seconds);
-
-    // double OPS = (nTotalElements) / total_time_in_seconds;
-    // printf("Throughput: %lf OP/s\n", OPS);
+#endif
 
 #if TEST_OUTPUT == 1
     verifyOutput(Input, Output, nTotalElements, k);

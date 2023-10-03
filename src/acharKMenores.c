@@ -11,8 +11,8 @@
 #include "chrono.h"
 #include "utils.h"
 
-// 1 -> roda o verify
-// 2 -> skipa verify
+// 1 -> Modo de check de output
+// 2 -> Modo de metricas
 #define TEST_OUTPUT 2
 
 int nTotalElements, k, nThreads;
@@ -103,6 +103,8 @@ int main(int argc, char **argv) {
             create_heap_pthread(offset, sizeForEach, i, &start_barrier);
         offset += sizeForEach;
     }
+
+    // Realizar os calculos de tempo de execução mais precisamente
     pthread_barrier_wait(&start_barrier);
     chrono_start(&chrono);
     pthread_barrier_wait(&start_barrier);
@@ -114,13 +116,15 @@ int main(int argc, char **argv) {
 
     Output = join_heaps(threads, nThreads, k);
 
-    // chrono_reportTime(&chrono, "parallelReductionTime");
+#if TEST_OUTPUT == 1
+    chrono_reportTime(&chrono, "parallelReductionTime");
+    double OPS = (nTotalElements) / total_time_in_seconds;
+    printf("Throughput: %lf OP/s\n", OPS);
+#else
     double total_time_in_seconds =
         (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
     printf("%lf\n", total_time_in_seconds);
-
-    // double OPS = (nTotalElements) / total_time_in_seconds;
-    // printf("Throughput: %lf OP/s\n", OPS);
+#endif
 
 #if TEST_OUTPUT == 1
     verifyOutput(Input, Output, nTotalElements, k);
