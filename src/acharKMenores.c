@@ -13,7 +13,7 @@
 
 // 1 -> Modo de check de output
 // 2 -> Modo de metricas
-#define TEST_OUTPUT 2
+#define TEST_OUTPUT 1
 
 int nTotalElements, k, nThreads;
 float *Input;
@@ -117,6 +117,8 @@ int main(int argc, char **argv) {
     Output = join_heaps(threads, nThreads, k);
 
 #if TEST_OUTPUT == 1
+    double total_time_in_seconds =
+        (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
     chrono_reportTime(&chrono, "parallelReductionTime");
     double OPS = (nTotalElements) / total_time_in_seconds;
     printf("Throughput: %lf OP/s\n", OPS);
