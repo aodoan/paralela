@@ -3,15 +3,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-float geraPoint(size_t dimension) {
-    int a, b, v;
-
-    srand(1);
-}
-
 void geraConjuntoDeDados(float *C, size_t size, size_t dimension) {
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < dimension; j++)
+    for (size_t i = 0; i < size; i++)
+        for (size_t j = 0; j < dimension; j++)
             C[i * dimension + j] = rand() * 100.0 + rand();
 }
 
@@ -31,6 +25,11 @@ void knn(float *Q, size_t size_q, float *P, size_t size_p, size_t dimension,
          size_t k) {}
 
 int main(int argc, char **argv) {
+    if (argc != 5){
+        printf("Entrada incorreta");
+        exit(1);
+    }
+
     int size_q = atoi(argv[1]);
     int size_p = atoi(argv[2]);
     int dimension = atoi(argv[3]);
@@ -58,5 +57,5 @@ int main(int argc, char **argv) {
     free(Q);
     free(R);
 
-    return 0;
+    exit(0);
 }
