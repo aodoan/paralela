@@ -2,6 +2,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+//given two points of D dimensions
+//calculate the distance between them
+float calculate_distance(float *a, float *b , size_t D, size_t ia, size_t ib){
+    float dist = 0.0, temp;
+
+    for(size_t i = 0; i < D; i++){
+        temp = b[i+ib]-a[i+ia];
+        dist = dist + temp*temp;  
+    }
+    return dist;
+}
 
 void geraConjuntoDeDados(float *C, size_t size, size_t dimension) {
     for (size_t i = 0; i < size; i++)
@@ -21,15 +35,24 @@ void verificaKNN(float *Q, int size_q, float *P, int size_pacharKNN, int dimensi
     }
 }
 
-void knn(float *Q, size_t size_q, float *P, size_t size_p, size_t dimension,
-         size_t k) {}
 
-int main(int argc, char **argv) {
-    if (argc != 5){
-        printf("Entrada incorreta");
-        exit(1);
+
+
+void knn(float *Q, size_t size_q, float *P, size_t size_p, size_t dimension, size_t k) {
+    double val;
+    for(size_t i = 0; i < size_q; i++){
+        for(size_t j = 0; j < size_p; j++){
+            //passa a linha I da matriz P
+            //passa a linha J da matriz Q
+            val = calculate_distance(P, Q, dimension, j*dimension, i*dimension);
+            printf("%f\n", val);
+        }
     }
 
+
+}
+
+int main(int argc, char **argv) {
     int size_q = atoi(argv[1]);
     int size_p = atoi(argv[2]);
     int dimension = atoi(argv[3]);
