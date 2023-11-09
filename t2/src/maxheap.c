@@ -4,23 +4,23 @@
 
 #include "maxheap.h"
 
-void maxHeapify(maxheap_t *heap, int size, int i) {
+void maxHeapify(float *heap, int size, int i) {
     float temp;
     while (1) {
         int largest = i;
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
-        if (left < size && heap->heap[left] > heap->heap[largest])
+        if (left < size && heap[left] > heap[largest])
             largest = left;
 
-        if (right < size && heap->heap[right] > heap->heap[largest])
+        if (right < size && heap[right] > heap[largest])
             largest = right;
 
         if (largest != i) {
-            temp = heap->heap[i];
-            heap->heap[i] = heap->heap[largest];
-            heap->heap[largest] = temp;
+            temp = heap[i];
+            heap[i] = heap[largest];
+            heap[largest] = temp;
             i = largest;
 
         } else {
@@ -29,19 +29,38 @@ void maxHeapify(maxheap_t *heap, int size, int i) {
     }
 }
 
-maxheap_t* createMaxHeap(size_t capacity){
-    maxheap_t *heap = (maxheap_t *)malloc(sizeof(maxheap_t));
-    heap->capacity = capacity;
-    heap->size = 0;
-    heap->heap = (float *)malloc(sizeof(float) * capacity);
+float* createMaxHeap(int capacity){
+    float *heap = (float *)malloc(sizeof(float) * capacity);
+    //for(int i = 0; i < capacity; i++) heap[i] = FLT_MAX;
     return heap;
 }
 
-void decreaseMax(maxheap_t *heap, float new_value) {
-    if (heap->size < heap->capacity) heap->size++;
-
-    if (heap->heap[0] > new_value) {
-        heap->heap[0] = new_value;
-        maxHeapify(heap, heap->size, 0);
+void decreaseMax(float *heap, int *size, int *capacity, float new_value) {
+    if (*size < *capacity){
+        *size = *size + 1;
     }
+        
+    if (heap[0] > new_value) {
+        heap[0] = new_value;
+        maxHeapify(heap, *size, 0);
+    }
+}
+
+
+int parent(int pos) { return ((pos - 1) / 2); }
+
+void heapifyUp(float *heap, int pos) {
+    float val = heap[pos];
+    while (pos > 0 && val > heap[parent(pos)]) {
+        heap[pos] = heap[parent(pos)];
+        pos = parent(pos);
+    }
+    heap[pos] = val;
+}
+
+void insert(float *heap, int *size, float element) {
+    *size += 1;
+    int last = *size - 1;
+    heap[last] = element;
+    heapifyUp(heap, last);
 }

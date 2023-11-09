@@ -3,7 +3,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -O3 -Wall -Wextra -Isrc -pthread
+CFLAGS = -O3 -Isrc -pthread
 
 # Source files
 SRC_DIR = src

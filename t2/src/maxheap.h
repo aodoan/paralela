@@ -4,16 +4,18 @@
 
 #ifndef MAXHEAP_H
 #define MAXHEAP_H
-
+#include <stdio.h>
 #include <stdlib.h>
-
+#include <float.h>
 typedef struct {
     float *heap;
     int size;
-    size_t capacity;
+    int capacity;
 } maxheap_t;
 
-maxheap_t* createMaxHeap(size_t capacity);
-void decreaseMax(maxheap_t *heap, float new_value);
-
+float* createMaxHeap(int capacity);
+void decreaseMax(float *heap, int *size, int *capacity, float new_value);
+void maxHeapify(float *heap, int size, int i);
+void heapifyUp(float *heap, int pos);
+void insert(float *heap, int *size, float element);
 #endif
