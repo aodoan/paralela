@@ -3,7 +3,7 @@
 CC = mpicc
 
 # Compiler flags
-CFLAGS = -O3 -Isrc -pthread
+CFLAGS = -O3 -Wall -Isrc -pthread -lm
 
 # Source files
 SRC_DIR = src
