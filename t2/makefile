@@ -1,6 +1,6 @@
 #feito por Chat Gepeto
 # Compiler
-CC = gcc
+CC = mpicc
 
 # Compiler flags
 CFLAGS = -O3 -Isrc -pthread

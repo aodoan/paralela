@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <mpi.h>
 #include "maxheap.h"
 
 #define IMPRIMIR_MATRIZES 1
@@ -91,17 +90,9 @@ int main(int argc, char **argv) {
     int size_p = atoi(argv[2]);
     int dimension = atoi(argv[3]);
     int k = atoi(argv[4]);
-    
-    int i, my_rank, n_proc;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &n_proc);
-    
-    
     srand(1);
     printf("|Q|:%zu |P|:%zu D:%zu k:%zu\n", size_q, size_p, dimension, k);
 
-    /*
     float *P = (float *)malloc(size_p * dimension * sizeof(float));
     if (P == NULL) printf("Malloc erro");
 
@@ -110,40 +101,14 @@ int main(int argc, char **argv) {
 
     float *R = (float *)malloc(size_q * k * sizeof(float));
     if (P == NULL) printf("Malloc erro");
-    */
-    //matriz contendo uma parcela dos pontos
-    float *P = (float *)malloc(size_p * dimension * sizeof(float));
-    if (P == NULL) printf("Malloc erro");
-
-    //matriz contendo todos os pontos de busca
-    float *local_Q = (float *)malloc(size_q/n_proc * dimension * sizeof(float));
-    if (local_Q == NULL) printf("Malloc erro");
-
-    //matriz PARCIAL da resposta (cada no tem uma)
-    float *R_local = (float *)malloc(size_q/n_proc * k * sizeof(float));
-    if (R_local == NULL) printf("Malloc erro");
-    //se for o processo 0, gera o P e o Q
-    float *Q;
-    if(my_rank == 0){
-        Q = (float *)malloc(size_q * dimension * sizeof(float));
-        geraConjuntoDeDados(Q, size_q, dimension);
-        
-    }
-    printf("size %i\n", size_q*dimension/n_proc);
-    MPI_Scatter(Q, size_q*dimension/n_proc, MPI_FLOAT, 
-    local_Q, size_q*dimension/n_proc, MPI_FLOAT, 0,
-    MPI_COMM_WORLD);
     
 
-    for(int i = 0; i < size_q/n_proc; i++){
-        for(int j = 0; j < dimension; j++){
-            printf("[%i]%f ", my_rank, local_Q[i*dimension + j]);
-        }
-        printf("\n");
-    }
-    /*
     geraConjuntoDeDados(P, size_p, dimension);
-    knn(local_Q, size_q/n_proc, P, size_p, dimension, k, R_local);
+    geraConjuntoDeDados(Q, size_q, dimension);
+
+
+
+    knn(Q, size_q, P, size_p, dimension, k, R);
 
     if(IMPRIMIR_MATRIZES){
     printf("Q\n");
@@ -161,11 +126,12 @@ int main(int argc, char **argv) {
         printf("\n");
     }
     }
-    verificaKNN(local_Q, size_q/n_proc, P, size_p, dimension, k, R_local);
+    verificaKNN(Q, size_q, P, size_p, dimension, k, R);
 
     free(P);
     free(Q);
-    */
+    free(R);
 
-    MPI_Finalize();
+
+    exit(0);
 }
