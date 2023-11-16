@@ -80,8 +80,7 @@ void knn(float *Q, int size_q, float *P, int size_p, int dimension, int k,
                 }
             }
 
-            // TODO usar o memcpy aqui deu preguiça
-            // coloca a heap na matriz resposta
+            // Coloca os index dos k vizinhos mais proximos no vetor R
             for (int j = 0; j < k; j++) {
                 R[i * k + j] = heap[j].index;
             }
