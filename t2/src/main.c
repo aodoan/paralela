@@ -58,10 +58,10 @@ void verificaKNN(float *Q, int size_q, float *P, int size_pacharKNN,
 
 // itera sobre o conjunto P para todo ponto Q
 void knn(float *Q, int size_q, float *P, int size_p, int dimension, int k,
-         float *R) {
-    double val;
+         int *R) {
+    double dist;
     int size;     // indica o numero de elementos na heap
-    float *heap;  // ponteiro usado para representar heap
+    pair_t *heap;  // ponteiro usado para representar heap
     heap = createMaxHeap(k);
     for (int i = 0; i < size_q; i++) {
         if (P[i * dimension] != FLT_MAX) {
@@ -69,25 +69,25 @@ void knn(float *Q, int size_q, float *P, int size_p, int dimension, int k,
             for (int j = 0; j < size_p; j++) {
                 // passa a linha I da matriz P
                 // passa a linha J da matriz Q
-                val = calculate_distance(P, Q, dimension, j * dimension,
+                dist = calculate_distance(P, Q, dimension, j * dimension,
                                          i * dimension);
                 // a heap ainda nao chegou no tamanho maximo insere o elemento e
                 // roda o max-heapify
-                if (size < k) insert(heap, &size, val);
+                if (size < k) insert(heap, &size, dist, j);
                 // a heap chegou no tamanho maximo, precisa rodar o decreaseMax
                 else {
-                    decreaseMax(heap, &size, &k, val);
+                    decreaseMax(heap, &size, &k, dist, j);
                 }
             }
 
             // TODO usar o memcpy aqui deu preguiça
             // coloca a heap na matriz resposta
             for (int j = 0; j < k; j++) {
-                R[i * k + j] = heap[j];
+                R[i * k + j] = heap[j].index;
             }
         } else {
             for (int j = 0; j < k; j++) {
-                R[i * k + j] = FLT_MAX;
+                R[i * k + j] = -1;
             }
         }
     }
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     if (local_Q == NULL) printf("Malloc erro");
 
     // matriz PARCIAL da resposta (cada no tem uma)
-    float *local_R = (float *)malloc(size_q_proc * k * sizeof(float));
+    int *local_R = (int *)malloc(size_q_proc * k * sizeof(int));
     if (local_R == NULL) printf("Malloc erro");
 
     // se for o processo 0, gera o P e o Q
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
                 size_q_proc * dimension, MPI_FLOAT, ROOT_PROCESS,
                 MPI_COMM_WORLD);
 
-    // Faz o broadcast para todos os processo da matriz P (database)
+    // Faz o broadcast para todos os processo da matriz P (dataset)
     MPI_Bcast(P, size_p * dimension, MPI_FLOAT, ROOT_PROCESS, MPI_COMM_WORLD);
 
     // Calcula o KNN dos pontos Q locais
@@ -174,15 +174,15 @@ int main(int argc, char **argv) {
 
     printf("alo\n");
     // junta todo no processo raiz
-    float *R;
+    int *R;
     if (my_rank == ROOT_PROCESS) {
-        R = (float *)malloc(size_q_divisable * k * sizeof(float));
+        R = (int *)malloc(size_q_divisable * k * sizeof(int));
         printf("%i\n", size_q_divisable * k);
     }
     
     // Realiza o Gather de todos os processos MPI
-    MPI_Gather(local_R, size_q_proc * k, MPI_FLOAT, R, size_q_proc * k,
-               MPI_FLOAT, ROOT_PROCESS, MPI_COMM_WORLD);
+    MPI_Gather(local_R, size_q_proc * k, MPI_INT, R, size_q_proc * k,
+               MPI_INT, ROOT_PROCESS, MPI_COMM_WORLD);
 
     // Para de contar o tempo
     chrono_stop(&chrono);

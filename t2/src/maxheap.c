@@ -4,17 +4,17 @@
 
 #include "maxheap.h"
 
-void maxHeapify(float *heap, int size, int i) {
-    float temp;
+void maxHeapify(pair_t *heap, int size, int i) {
+    pair_t temp;
     while (1) {
         int largest = i;
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
-        if (left < size && heap[left] > heap[largest])
+        if (left < size && heap[left].dist > heap[largest].dist)
             largest = left;
 
-        if (right < size && heap[right] > heap[largest])
+        if (right < size && heap[right].dist > heap[largest].dist)
             largest = right;
 
         if (largest != i) {
@@ -29,19 +29,20 @@ void maxHeapify(float *heap, int size, int i) {
     }
 }
 
-float* createMaxHeap(int capacity){
-    float *heap = (float *)malloc(sizeof(float) * capacity);
+pair_t* createMaxHeap(int capacity){
+    pair_t *heap = (pair_t *)malloc(sizeof(pair_t) * capacity);
     //for(int i = 0; i < capacity; i++) heap[i] = FLT_MAX;
     return heap;
 }
 
-void decreaseMax(float *heap, int *size, int *capacity, float new_value) {
+void decreaseMax(pair_t *heap, int *size, int *capacity, float dist, int index) {
     if (*size < *capacity){
         *size = *size + 1;
     }
         
-    if (heap[0] > new_value) {
-        heap[0] = new_value;
+    if (heap[0].dist > dist) {
+        heap[0].dist = dist;
+        heap[0].index = index;
         maxHeapify(heap, *size, 0);
     }
 }
@@ -49,18 +50,21 @@ void decreaseMax(float *heap, int *size, int *capacity, float new_value) {
 
 int parent(int pos) { return ((pos - 1) / 2); }
 
-void heapifyUp(float *heap, int pos) {
-    float val = heap[pos];
-    while (pos > 0 && val > heap[parent(pos)]) {
+void heapifyUp(pair_t *heap, int pos) {
+    pair_t temp = heap[pos];
+
+    while (pos > 0 && temp.dist > heap[parent(pos)].dist) {
         heap[pos] = heap[parent(pos)];
         pos = parent(pos);
     }
-    heap[pos] = val;
+
+    heap[pos] = temp;
 }
 
-void insert(float *heap, int *size, float element) {
+void insert(pair_t *heap, int *size, float dist, int index) {
     *size += 1;
     int last = *size - 1;
-    heap[last] = element;
+    heap[last].dist = dist;
+    heap[last].index = index;
     heapifyUp(heap, last);
 }
