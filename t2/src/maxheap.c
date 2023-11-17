@@ -39,7 +39,6 @@ void decreaseMax(pair_t *heap, int *size, int *capacity, float dist, int index) 
     if (*size < *capacity){
         *size = *size + 1;
     }
-        
     if (heap[0].dist > dist) {
         heap[0].dist = dist;
         heap[0].index = index;
