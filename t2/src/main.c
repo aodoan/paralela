@@ -3,7 +3,7 @@
 // Rodrigo Saviam Soffner GRR20205092
 
 #include <math.h>
-#include <mpi.h>
+#include <mpich/mpi.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,7 @@
 
 // define qual processo envia para os outros
 #define ROOT_PROCESS 0
+#define TEST_OUTPUT 0
 
 #define IMPRIMIR_MATRIZES 0
 // dado dois vetores calcula a distancia entre eles
@@ -193,7 +194,7 @@ int main(int argc, char **argv) {
     double total_time_in_seconds =
         (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
     chrono_reportTime(&chrono, "parallelReductionTime");
-    double OPS = (nTotalElements) / total_time_in_seconds;
+    double OPS = (size_q * size_p * dimension) / total_time_in_seconds;
     printf("Throughput: %lf OP/s\n", OPS);
 #else
     double total_time_in_seconds =
