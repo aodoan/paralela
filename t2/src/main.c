@@ -3,8 +3,8 @@
 // Rodrigo Saviam Soffner GRR20205092
 
 #include <math.h>
-#include <mpich/mpi.h>
-// #include <mpi.h>
+//#include <mpich/mpi.h>
+#include <mpi.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -158,8 +158,7 @@ int main(int argc, char **argv) {
     chrono_reset(&chrono);
 
     srand(1);
-    printf("|Q|:%i |P|:%i D:%i k:%i\n", size_q, size_p, dimension, k);
-
+    
     float *P = (float *)malloc(size_p * dimension * sizeof(float));
     if (P == NULL) printf("Malloc erro");
 
@@ -216,13 +215,7 @@ int main(int argc, char **argv) {
     // Para de contar o tempo
     chrono_stop(&chrono);
 
-    for(int i = 0; i < size_q; i++){
-        printf("resultados[%i] ", my_rank);
-        for(int j = 0; j < k; j++)
-            printf("[%i] ", local_R[i*k+j]);
-        printf("\n");
-    }
-    printf("\n");
+
     if (IMPRIMIR_MATRIZES) {
         printf("Q\n");
         for (int i = 0; i < size_q / n_proc; i++) {
