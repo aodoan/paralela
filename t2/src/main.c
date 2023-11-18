@@ -206,32 +206,39 @@ int main(int argc, char **argv) {
     int *local_R = (int *)malloc(size_qq * k * sizeof(int));
     if (local_R == NULL) printf("Malloc erro");
 
+
+    // Começa a contar o tempo
+    chrono_start(&chrono);
+
     // Calcula o KNN dos pontos Q locais
     knn(local_Q, sizes[my_rank], P, size_p, dimension, k, local_R);
 
-    // for(int i = 0; i < size_q; i++){
-    //     printf("resultados[%i] ", my_rank);
-    //     for(int j = 0; j < k; j++)
-    //         printf("[%i] ", local_R[i*k+j]);
-    //     printf("\n");
-    // }
-    // printf("\n");
-    // if (IMPRIMIR_MATRIZES) {
-    //     printf("Q\n");
-    //     for (int i = 0; i < size_q / n_proc; i++) {
-    //         for (int j = 0; j < dimension; j++) {
-    //             printf("%f ", local_Q[i * dimension + j]);
-    //         }
-    //         printf("\n");
-    //     }
-    //     printf("\nP\n");
-    //     for (int i = 0; i < size_p; i++) {
-    //         for (int j = 0; j < dimension; j++) {
-    //             printf("%f ", P[i * dimension + j]);
-    //         }
-    //         printf("\n");
-    //     }
-    // }
+    // Para de contar o tempo
+    chrono_stop(&chrono);
+
+    for(int i = 0; i < size_q; i++){
+        printf("resultados[%i] ", my_rank);
+        for(int j = 0; j < k; j++)
+            printf("[%i] ", local_R[i*k+j]);
+        printf("\n");
+    }
+    printf("\n");
+    if (IMPRIMIR_MATRIZES) {
+        printf("Q\n");
+        for (int i = 0; i < size_q / n_proc; i++) {
+            for (int j = 0; j < dimension; j++) {
+                printf("%f ", local_Q[i * dimension + j]);
+            }
+            printf("\n");
+        }
+        printf("\nP\n");
+        for (int i = 0; i < size_p; i++) {
+            for (int j = 0; j < dimension; j++) {
+                printf("%f ", P[i * dimension + j]);
+            }
+            printf("\n");
+        }
+    }
 
     // Cria o vetor R que vai receber os resultados de todos os processos
     int *R = NULL;
@@ -249,47 +256,37 @@ int main(int argc, char **argv) {
     MPI_Gatherv(local_R, sizes_dimension[my_rank], MPI_INT, R, sizes_dimension,
                 displ_dimension, MPI_INT, ROOT_PROCESS, MPI_COMM_WORLD);
 
-    // Para de contar o tempo
-    chrono_stop(&chrono);
-
     double total_time_in_seconds[1] = {(double)chrono_gettotal(&chrono) /
                                        ((double)1000 * 1000 * 1000)};
 
     double *times = NULL;
 
-    total_time_in_seconds[0] = my_rank;
-
     if (my_rank == ROOT_PROCESS)
         times = (double *)malloc(n_proc * sizeof(double));
 
     // Tem que fazer o gather dos tempos
-    MPI_Gather(total_time_in_seconds, 1, MPI_DOUBLE, times, n_proc, MPI_DOUBLE,
+    MPI_Gather(total_time_in_seconds, 1, MPI_DOUBLE, times, 1, MPI_DOUBLE,
                ROOT_PROCESS, MPI_COMM_WORLD);
 
-    if (my_rank == ROOT_PROCESS)
-        for (int i = 0; i < n_proc; i++) {
-            printf("processo %i: %lf\n", i, times[i]);
+    #if TEST_OUTPUT == 1
+        //  tem que atualizar
+        // double total_time_in_seconds =
+        //     (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
+        // chrono_reportTime(&chrono, "parallelReductionTime");
+        // double OPS = (size_q * size_p * dimension) / total_time_in_seconds;
+        // printf("%lf\n", total_time_in_seconds);
+    #else
+        double total_time_in_seconds =
+            (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
+        printf("%lf\n", total_time_in_seconds);
+    #endif
+
+    #if TEST_OUTPUT == 1
+        if (my_rank == ROOT_PROCESS) {
+            verificaKNN(Q, size_q, P, size_p, dimension, k, R);
+            printf("\n");
         }
-
-    // #if TEST_OUTPUT == 1
-    //     double total_time_in_seconds =
-    //         (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
-    //     chrono_reportTime(&chrono, "parallelReductionTime");
-    //     double OPS = (size_q * size_p * dimension) / total_time_in_seconds;
-    //     printf("%lf\n", total_time_in_seconds);
-    // #else
-    //     double total_time_in_seconds =
-    //         (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
-    //     printf("%lf\n", total_time_in_seconds);
-    // #endif
-
-    // #if TEST_OUTPUT == 1
-    //     if (my_rank == ROOT_PROCESS) {
-    //         verificaKNN(Q, size_q, P, size_p, dimension, k, R);
-    //         verificaSolucao(Q, size_q, P, size_p, dimension, k, R);
-    //         printf("\n");
-    //     }
-    // #endif
+    #endif
 
     MPI_Finalize();
 }

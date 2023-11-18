@@ -53,3 +53,4 @@ dkms.conf
 acharKMenores
 knn-mpi
 .vscode/
+*.btr
