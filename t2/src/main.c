@@ -261,6 +261,15 @@ int main(int argc, char **argv) {
     MPI_Gather(total_time_in_seconds, 1, MPI_DOUBLE, times, 1, MPI_DOUBLE,
                ROOT_PROCESS, MPI_COMM_WORLD);
 
+    if(my_rank == ROOT_PROCESS){
+        double avg = 0.0;
+        for(int i = 0; i < n_proc; i++){
+            avg = avg + times[i];
+        }
+        avg = avg / n_proc;
+        printf("time spent: %lf\n", avg);
+    }
+
     #if TEST_OUTPUT == 1
         //  tem que atualizar
         // double total_time_in_seconds =
