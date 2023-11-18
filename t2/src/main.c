@@ -262,12 +262,12 @@ int main(int argc, char **argv) {
                ROOT_PROCESS, MPI_COMM_WORLD);
 
     if(my_rank == ROOT_PROCESS){
-        double avg = 0.0;
+        double m = times[0];
         for(int i = 0; i < n_proc; i++){
-            avg = avg + times[i];
+            if(times[i] > m)
+                m = times[i];
         }
-        avg = avg / n_proc;
-        printf("time spent: %lf\n", avg);
+        printf("time spent: %lf\n", m);
     }
 
     #if TEST_OUTPUT == 1
