@@ -2,10 +2,7 @@
 // Claudinei Aparecido Alduan Filho GRR20203920
 // Rodrigo Saviam Soffner GRR20205092
 
-
-//ADICIONANDO threads, n sei se vai funcionar
 #include <math.h>
-//#include <mpich/mpi.h>
 #include <mpi.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -17,26 +14,12 @@
 
 #include "chrono.h"
 #include "maxheap.h"
-
+#include "threads.h"
 // define qual processo envia para os outros
-#define ROOT_PROCESS 0
-#define TEST_OUTPUT 1
+#define ROOT_PROCESS        0
+#define TEST_OUTPUT         1
 
-#define IMPRIMIR_MATRIZES 0
-// dado dois vetores calcula a distancia entre eles
-// OBS como os vetores estao em uma matriz, precisa dar o offset que eles se
-// encontram
-// TODO talvez mudar pra dar a linha logo
-
-float distancia(float *A, float *B, int dimension) {
-    float dist = 0.0;
-    float temp;
-    for (int i = 0; i < dimension; i++) {
-        temp = A[i] - B[i];
-        dist = dist + temp * temp;
-    }
-    return dist;
-}
+#define IMPRIMIR_MATRIZES   0
 
 void geraConjuntoDeDados(float *C, int size, int dimension) {
     int a, b;
@@ -50,161 +33,7 @@ void geraConjuntoDeDados(float *C, int size, int dimension) {
     }
 }
 
-void knn(float *Q, int size_q, float *P, int size_p, int dimension, int k,
-         int *R) {
-    double dist;
-    int size;      // indica o numero de elementos na heap
-    pair_t *heap;  // ponteiro usado para representar heap
-    heap = createMaxHeap(k);
-    for (int i = 0; i < size_q; i++) {
-        size = 0;
-        for (int j = 0; j < size_p; j++) {
-            // passa a linha I da matriz P
-            // passa a linha J da matriz Q
 
-            dist = distancia(&P[j * dimension], &Q[i * dimension], dimension);
-            // a heap ainda nao chegou no tamanho maximo insere o elemento e
-            // roda o max-heapify
-            if (size < k) {
-                insert(heap, &size, dist, j);
-            }
-            // a heap chegou no tamanho maximo, precisa rodar o decreaseMax
-            else {
-                decreaseMax(heap, &size, &k, dist, j);
-            }
-        }
-        // Coloca os index dos k vizinhos mais proximos no vetor R
-        for (int j = 0; j < k; j++) {
-            R[i * k + j] = heap[j].index;
-        }
-    }
-}
-// retorna 1 se deu certo
-// 0 caso contrario
-void verificaKNN(float *Q, int nq, float *P, int n, int D, int k,
-                 int *resultIndices) {
-    int correto = 1;
-
-    for (int i = 0; i < nq; i++) {
-        // Array para armazenar as distâncias dos k vizinhos mais próximos
-        float *distances = (float *)malloc(k * sizeof(float));
-        for (int j = 0; j < k; j++) {
-            distances[j] = FLT_MAX;
-        }
-
-        // Encontrar os k vizinhos mais próximos para Q[i]
-        for (int j = 0; j < n; j++) {
-            // float dist = distancia(&Q[i], &P[j], D);
-            float dist = distancia(&Q[i * D], &P[j * D], D);
-
-            // Verifica se esta distância é menor que a maior distância no array
-            // distances
-            if (dist < distances[k - 1]) {
-                distances[k - 1] = dist;
-
-                // Ordena o array distances
-                for (int l = k - 1; l > 0 && distances[l] < distances[l - 1];
-                     l--) {
-                    float temp = distances[l];
-                    distances[l] = distances[l - 1];
-                    distances[l - 1] = temp;
-                }
-            }
-        }
-
-        // Verifica se os resultados obtidos estão corretos
-        for (int j = 0; j < k; j++) {
-            // float resultDist = distancia(&Q[i], &P[resultIndices[i*n + j]],
-            // D);
-            float resultDist =
-                distancia(&Q[i * D], &P[(resultIndices[i * k + j]) * D], D);
-            // float resultDist = 0.0;
-            int found = 0;
-            for (int l = 0; l < k; l++) {
-                if (resultDist == distances[l]) {
-                    found = 1;
-                    break;
-                }
-            }
-            if (!found) {
-                correto = 0;
-                break;
-            }
-        }
-
-        free(distances);
-
-        if (!correto) {
-            break;
-        }
-    }
-
-    if (correto) {
-        printf("CORRETO\n");
-    } else {
-        printf("ERRADO\n");
-    }
-}
-
-
-void *threadKNN(void *args){
-    thread_t *thread = (thread_t *) args;
-    float *start_q = thread->start_point;
-    
-    
-    //barreira
-    pthread_barrier_wait(thread->start);
-    knn(start_q, thread->search_size, thread->P, thread->size_p, 
-            thread->dimension, thread->k, thread->local_R);
-
-    //barreira
-    pthread_barrier_wait(thread->start);
-    pthread_exit(NULL);
-
-}
-
-
-thread_t *create_thread(int id, float *Q, int search_size, float *P, 
-        int size_p, int k, int dimension, pthread_barrier_t *start){
-    thread_t *thread = malloc(sizeof(thread_t));
-    
-    thread->id = id;
-
-    thread->start_point = Q;
-    thread->local_R = malloc(sizeof(int) * search_size * k);
-    thread->search_size = search_size;
-    thread->P = P;
-    thread->size_p = size_p;
-    thread->k = k;
-    thread->dimension = dimension;
-
-    thread->start = start;
-    int return_val = pthread_create(&thread->thread, NULL, threadKNN, (void *) thread);
-    if(return_val){
-        printf("Ocorreu um erro ao criar a thread, abortando.\n");
-        exit(1);
-    }
-    return thread;
-}
-
-
-void junta_resultados(int *R, int k, thread_t **threads, int nt){
-	
-    int size, contador = 0;
-    //itera sobre as threads
-    for(int i = 0; i < nt; i++){
-		size = threads[i]->search_size;
-		//itera sobre os pontos de uma thread
-		for(int j = 0; j < size; j++){
-			
-			for(int m = 0; m < k; m++)
-				R[contador*k+m] = threads[i]->local_R[j*k+m];
-			
-			//para saber qual linha do R vai ser
-			contador++;
-		}
-    }
-}
 float *P = NULL;
 float *Q = NULL;
 float *local_Q;
@@ -267,7 +96,7 @@ int main(int argc, char **argv) {
     // Faz o broadcast para todos os processo da matriz P (dataset)
     MPI_Bcast(P, size_p * dimension, MPI_FLOAT, ROOT_PROCESS, MPI_COMM_WORLD);
     //a partir desse ponto, todos os processos tem todos os pontos
-    //cada processo separa 
+    //cada processo separa em nt threads
     
     pthread_barrier_t start;
     pthread_barrier_init(&start, NULL, nt + 1);
@@ -278,7 +107,7 @@ int main(int argc, char **argv) {
     for(int i = 0; i < nt; i++){
         //se for a ultima thread, pega o resto que sobrou
         if(i == nt - 1)
-            size_of_each = (sizes[my_rank] / nt) + (sizes[my_rank] % nt);
+            size_of_each = (sizes[my_rank] / nt) + (sizes[my_rank] % nt); //pega o mesmo tanto que todas as threads pegou + o que sobrou
         threads[i] = create_thread(i, &local_Q[where*dimension], size_of_each, P, 
                 size_p, k, dimension, &start);
         where = where + size_of_each;
@@ -288,26 +117,15 @@ int main(int argc, char **argv) {
     pthread_barrier_wait(&start);
     // Começa a contar o tempo
     chrono_start(&chrono);
-   
-
-    // Para de contar o tempo
+       // Para de contar o tempo
     pthread_barrier_wait(&start);
     chrono_stop(&chrono);
-    /* 
-	for(int i = 0; i < size_q; i++){
-		for(int j = 0; j < k; j++){
-			printf("%i ", threads[0]->local_R[i*k+j]);
-			
-		}
-		printf("\n");
-	}
-    */
     //junta o R de cada thread em um R local
     int *local_R = malloc(sizeof(int) * k * sizes[my_rank]);
-	printf("flag\n");
 	
     junta_resultados(local_R, k, threads, nt);
-	printf("saida\n");
+
+    limpa_threads(threads, nt);
     if (IMPRIMIR_MATRIZES) {
         printf("Q\n");
         for (int i = 0; i < size_q / n_proc; i++) {
