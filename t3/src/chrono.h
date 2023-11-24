@@ -1,3 +1,5 @@
+#ifndef __CHRONO__
+#define __CHRONO__
 #include <time.h>
 
 typedef struct {
@@ -13,3 +15,4 @@ long long chrono_getcount(chronometer_t *chrono);
 void chrono_stop(chronometer_t *chrono);
 void chrono_reportTime(chronometer_t *chrono, char *s);
 void chrono_report_TimeInLoop(chronometer_t *chrono, char *s, int loop_count);
+#endif

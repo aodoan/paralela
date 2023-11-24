@@ -179,23 +179,15 @@ int main(int argc, char **argv) {
         }
         printf("time spent: %lf\n", m);
     }
-    #if TEST_OUTPUT == 1
-        //  tem que atualizar
-        // double total_time_in_seconds =
-        //     (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
-        // chrono_reportTime(&chrono, "parallelReductionTime");
-        // double OPS = (size_q * size_p * dimension) / total_time_in_seconds;
-        // printf("%lf\n", total_time_in_seconds);
-    #else
-        double total_time_in_seconds =
-            (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
-        printf("%lf\n", total_time_in_seconds);
-    #endif
-
+    
     #if TEST_OUTPUT == 1
         if (my_rank == ROOT_PROCESS) {
+            double total_time_in_seconds =
+            (double)chrono_gettotal(&chrono) / ((double)1000 * 1000 * 1000);
+            printf("%lf\n", total_time_in_seconds);
             verificaKNN(Q, size_q, P, size_p, dimension, k, R);
             printf("\n");
+
         }
     #endif
 	
